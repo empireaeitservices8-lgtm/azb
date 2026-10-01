@@ -6,6 +6,7 @@ import TopPicks from '@/components/ui/TopPicks';
 import OutfitsForKids from '@/components/ui/OutfitsForKids';
 import OfferZone from '@/components/ui/OfferZone';
 import OutfitsForYou from '@/components/ui/OutfitsForYou';
+import InstagramReels from '@/components/ui/InstagramReels';
 import Features from '@/components/ui/Features';
 
 export default function Home() {
@@ -31,6 +32,9 @@ export default function Home() {
 
       {/* Outfits For You */}
       <OutfitsForYou />
+
+      {/* Instagram Reel Carousel */}
+      <InstagramReels />
 
       {/* Features / Benefits */}
       <Features />

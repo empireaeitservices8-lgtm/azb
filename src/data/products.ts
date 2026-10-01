@@ -266,7 +266,7 @@ export const allProducts: Product[] = [
     originalPrice: 999,
     discount: "40% Off",
     soldOut: true,
-    image: "https://images.unsplash.com/photo-1583391733959-f183063f3146?auto=format&fit=crop&q=80&w=400&h=500",
+    image: "https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&q=80&w=400&h=500",
     tags: ["pakistani", "black", "suit", "salwar", "ethnic", "2 piece"]
   },
   {
@@ -278,7 +278,7 @@ export const allProducts: Product[] = [
     originalPrice: 1499,
     discount: "47% Off",
     soldOut: false,
-    image: "https://images.unsplash.com/photo-1620012253295-c15ce3eec8e7?auto=format&fit=crop&q=80&w=400&h=500",
+    image: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&q=80&w=400&h=500",
     tags: ["mehak", "suit", "embroidery", "dupatta", "3 piece"]
   },
   {
@@ -290,7 +290,7 @@ export const allProducts: Product[] = [
     originalPrice: 1599,
     discount: "44% Off",
     soldOut: false,
-    image: "https://images.unsplash.com/photo-1550614000-4b953d6067eb?auto=format&fit=crop&q=80&w=400&h=500",
+    image: "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?auto=format&fit=crop&q=80&w=400&h=500",
     tags: ["pink blossom", "festive", "chanderi", "ethnic", "3 piece"]
   },
 

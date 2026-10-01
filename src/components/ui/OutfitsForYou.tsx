@@ -38,13 +38,13 @@ const products = [
   },
   {
     id: 4,
-    title: "BLACK PAKISTANI CPLLECTION(2 PIECE)",
+    title: "BLACK PAKISTANI COLLECTION (2 PIECE)",
     category: "Outfits",
     price: 599,
     originalPrice: 999,
     discount: "40% Off",
     soldOut: true,
-    image: "https://images.unsplash.com/photo-1583391733959-f183063f3146?auto=format&fit=crop&q=80&w=400&h=500"
+    image: "https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&q=80&w=400&h=500"
   },
   {
     id: 5,
@@ -54,7 +54,7 @@ const products = [
     originalPrice: 1499,
     discount: "47% Off",
     soldOut: false,
-    image: "https://images.unsplash.com/photo-1620012253295-c15ce3eec8e7?auto=format&fit=crop&q=80&w=400&h=500"
+    image: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&q=80&w=400&h=500"
   },
   {
     id: 6,
@@ -64,7 +64,7 @@ const products = [
     originalPrice: 1599,
     discount: "44% Off",
     soldOut: false,
-    image: "https://images.unsplash.com/photo-1550614000-4b953d6067eb?auto=format&fit=crop&q=80&w=400&h=500"
+    image: "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?auto=format&fit=crop&q=80&w=400&h=500"
   },
   {
     id: 7,
