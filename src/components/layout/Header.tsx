@@ -162,7 +162,7 @@ export default function Header() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onFocus={() => { if (searchQuery.trim()) setIsSearchOpen(true); }}
-                placeholder="Search for toys, outfits, markers, books..." 
+                placeholder="Search for toys, wipes, markers, books..." 
                 className="w-full bg-transparent border-none py-2 px-5 text-gray-800 focus:outline-none text-sm placeholder-gray-400"
               />
               {searchQuery && (
@@ -297,7 +297,7 @@ export default function Header() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onFocus={() => { if (searchQuery.trim()) setIsSearchOpen(true); }}
-              placeholder="Search toys, outfits, markers, books..." 
+              placeholder="Search toys, wipes, markers, books..." 
               className="w-full bg-transparent border-none py-1.5 px-4 text-gray-800 focus:outline-none text-xs sm:text-sm placeholder-gray-400"
             />
             {searchQuery && (
@@ -392,9 +392,6 @@ export default function Header() {
               </li>
               <li>
                 <Link href="/kids" className="text-gray-700 hover:text-yellow-600 transition-colors font-semibold text-sm">Kids</Link>
-              </li>
-              <li>
-                <Link href="/outfits" className="text-gray-700 hover:text-yellow-600 transition-colors font-semibold text-sm">Outfits</Link>
               </li>
               <li>
                 <Link href="/shop" className="text-gray-700 hover:text-yellow-600 transition-colors font-semibold text-sm">All Products</Link>
@@ -500,14 +497,6 @@ export default function Header() {
                   className="flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-semibold text-gray-800 hover:bg-gray-100"
                 >
                   <span>Kids Zone & Toys</span>
-                  <ChevronRight size={16} className="text-gray-400" />
-                </Link>
-                <Link 
-                  href="/outfits" 
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-semibold text-gray-800 hover:bg-gray-100"
-                >
-                  <span>Outfits & Fashion</span>
                   <ChevronRight size={16} className="text-gray-400" />
                 </Link>
                 <Link 

@@ -1,260 +1,210 @@
 'use client';
-import React, { useRef, useEffect } from 'react';
-import { Heart, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useCart } from '@/contexts/CartContext';
-import { useWishlist } from '@/contexts/WishlistContext';
-import { Product } from '@/data/products';
+import React, { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-const products = [
+interface BestSellingItem {
+  id: number | string;
+  title: string;
+  image: string;
+  link: string;
+}
+
+// 10 completely unique items
+const bestSellingItems: BestSellingItem[] = [
   {
     id: 1,
-    title: "Dual Tip Alcohol Based Marker Cum Sketch (48 Piece Box)",
-    category: "Kids",
-    price: 699,
-    originalPrice: 999,
-    discount: "30% Off",
-    soldOut: true,
-    image: "https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?auto=format&fit=crop&q=80&w=400&h=500"
+    title: "Shoe Shine Wipes - ₹180",
+    image: "/images/shoe_shine_wipes_banner.jpg",
+    link: "/shop?q=shoe+shine+wipes"
   },
   {
     id: 2,
-    title: "Twistup Rolling Crayon",
-    category: "Kids",
-    price: 319,
-    originalPrice: 399,
-    discount: "20% Off",
-    soldOut: false,
-    image: "https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?auto=format&fit=crop&q=80&w=400&h=500"
+    title: "7 in 1 Laundry Pod - ₹200",
+    image: "/images/laundry_pod_banner.jpg",
+    link: "/shop?q=laundry+pod"
   },
   {
     id: 3,
-    title: "Girls Short Sets (Upto 4 Years)",
-    category: "Kids, Outfits",
-    price: 349,
-    originalPrice: 449,
-    discount: "22% Off",
-    soldOut: false,
-    image: "https://images.unsplash.com/photo-1503919545889-aef636e10ad4?auto=format&fit=crop&q=80&w=400&h=500"
+    title: "Shoe Shine Wipes (80 Series Pack)",
+    image: "/images/shoe_shine_wipes.jpg",
+    link: "/shop?q=shoe+shine+wipes"
   },
   {
     id: 4,
-    title: "Elephant Stack Attack",
-    category: "Kids",
-    price: 361,
-    originalPrice: 399,
-    discount: "10% Off",
-    soldOut: false,
-    image: "https://images.unsplash.com/photo-1599623560574-39d485900c95?auto=format&fit=crop&q=80&w=400&h=500"
+    title: "7 in 1 Laundry Pod (20 Pods Pack)",
+    image: "/images/laundry_pod.jpg",
+    link: "/shop?q=laundry+pod"
   },
   {
     id: 5,
-    title: "Pressing Giraffe Toy",
-    category: "Kids",
-    price: 149,
-    originalPrice: 169,
-    discount: "12% Off",
-    soldOut: false,
-    image: "https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?auto=format&fit=crop&q=80&w=400&h=500"
+    title: "Dual Tip Marker Sketch 48 Pcs",
+    image: "https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?auto=format&fit=crop&q=80&w=400&h=500",
+    link: "/shop?q=marker"
   },
   {
     id: 6,
-    title: "Premium Silicone Pencil Pouch",
-    category: "Kids",
-    price: 242,
-    originalPrice: 399,
-    discount: "39% Off",
-    soldOut: false,
-    image: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&q=80&w=400&h=500"
+    title: "Twistup Rolling Crayon",
+    image: "https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?auto=format&fit=crop&q=80&w=400&h=500",
+    link: "/shop?q=crayon"
   },
   {
     id: 7,
-    title: "Dual Tip Alcohol Based Marker Cum Sketch (48 Piece Box)",
-    category: "Kids",
-    price: 699,
-    originalPrice: 999,
-    discount: "30% Off",
-    soldOut: true,
-    image: "https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?auto=format&fit=crop&q=80&w=400&h=500"
+    title: "Elephant Stack Attack",
+    image: "https://images.unsplash.com/photo-1599623560574-39d485900c95?auto=format&fit=crop&q=80&w=400&h=500",
+    link: "/shop?q=elephant"
   },
   {
     id: 8,
-    title: "Twistup Rolling Crayon",
-    category: "Kids",
-    price: 319,
-    originalPrice: 399,
-    discount: "20% Off",
-    soldOut: false,
-    image: "https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?auto=format&fit=crop&q=80&w=400&h=500"
+    title: "Pressing Giraffe Toy",
+    image: "https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?auto=format&fit=crop&q=80&w=400&h=500",
+    link: "/shop?q=giraffe"
   },
   {
     id: 9,
-    title: "Girls Short Sets (Upto 4 Years)",
-    category: "Kids, Outfits",
-    price: 349,
-    originalPrice: 449,
-    discount: "22% Off",
-    soldOut: false,
-    image: "https://images.unsplash.com/photo-1503919545889-aef636e10ad4?auto=format&fit=crop&q=80&w=400&h=500"
+    title: "Premium Silicone Pencil Pouch",
+    image: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&q=80&w=400&h=500",
+    link: "/shop?q=pouch"
   },
   {
     id: 10,
-    title: "Elephant Stack Attack",
-    category: "Kids",
-    price: 361,
-    originalPrice: 399,
-    discount: "10% Off",
-    soldOut: false,
-    image: "https://images.unsplash.com/photo-1599623560574-39d485900c95?auto=format&fit=crop&q=80&w=400&h=500"
+    title: "Basketball Hoop Set for Kids",
+    image: "https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&q=80&w=400&h=500",
+    link: "/shop?q=basketball"
   }
 ];
 
+// Group items into pairs of exactly 2 items
+const pairs: BestSellingItem[][] = [];
+for (let i = 0; i < bestSellingItems.length; i += 2) {
+  pairs.push([bestSellingItems[i], bestSellingItems[i + 1]]);
+}
+
+// Append clone of pair 0 at the end for seamless infinite loop
+const displayPairs = [...pairs, pairs[0]];
+
 export default function BestSellingProducts() {
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const { addToCart } = useCart();
-  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(true);
+  const touchStartX = useRef<number | null>(null);
 
-  // Duplicate products to create 4 identical sets for the infinite loop illusion
-  const displayProducts = [...products, ...products, ...products, ...products].map((p, i) => ({ ...p, uniqueId: i }));
+  const totalPairs = pairs.length;
 
-  useEffect(() => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
+  const nextSlide = () => {
+    setIsTransitioning(true);
+    setCurrentSlide((prev) => prev + 1);
+  };
 
-    // Wait a brief moment for layout to complete
-    setTimeout(() => {
-      const setWidth = container.scrollWidth / 4;
-      container.scrollLeft = setWidth;
-    }, 100);
+  const prevSlide = () => {
+    setIsTransitioning(true);
+    setCurrentSlide((prev) => (prev === 0 ? totalPairs - 1 : prev - 1));
+  };
 
-    const handleScroll = () => {
-      const setWidth = container.scrollWidth / 4;
-      if (container.scrollLeft < setWidth / 2) {
-        container.scrollLeft += setWidth * 2;
-      } else if (container.scrollLeft > setWidth * 2.5) {
-        container.scrollLeft -= setWidth * 2;
-      }
-    };
-
-    container.addEventListener('scroll', handleScroll);
-    
-    const timer = setInterval(() => {
-      if (scrollContainerRef.current) {
-        const step = window.innerWidth < 640 ? 200 : 300;
-        scrollContainerRef.current.scrollBy({ left: step, behavior: 'smooth' });
-      }
-    }, 15000);
-
-    return () => {
-      container.removeEventListener('scroll', handleScroll);
-      clearInterval(timer);
-    };
-  }, []);
-
-  const scrollLeft = () => {
-    if (scrollContainerRef.current) {
-      const step = window.innerWidth < 640 ? 200 : 300;
-      scrollContainerRef.current.scrollBy({ left: -step, behavior: 'smooth' });
+  const handleTransitionEnd = () => {
+    // If we reached the cloned slide at the end, jump back to 0 without animation
+    if (currentSlide >= totalPairs) {
+      setIsTransitioning(false);
+      setCurrentSlide(0);
     }
   };
 
-  const scrollRight = () => {
-    if (scrollContainerRef.current) {
-      const step = window.innerWidth < 640 ? 200 : 300;
-      scrollContainerRef.current.scrollBy({ left: step, behavior: 'smooth' });
+  // Strict 5-second interval
+  useEffect(() => {
+    const timer = setInterval(() => {
+      nextSlide();
+    }, 5000);
+
+    return () => clearInterval(timer);
+  }, [totalPairs]);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    const diff = touchStartX.current - e.changedTouches[0].clientX;
+    if (diff > 45) {
+      nextSlide();
+    } else if (diff < -45) {
+      prevSlide();
     }
+    touchStartX.current = null;
   };
 
   return (
     <section className="container mx-auto px-4 sm:px-6 md:px-8 py-8 md:py-12">
       {/* Header */}
       <div className="flex items-center justify-between mb-4 sm:mb-6">
-        <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 uppercase tracking-wide">
-          BEST SELLING PRODUCTS
-        </h2>
-        <div className="flex items-center gap-1.5 sm:gap-2">
+        <div>
+          <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 uppercase tracking-wide">
+            BEST SELLING PRODUCTS
+          </h2>
+          <p className="text-[11px] sm:text-xs text-gray-500 mt-0.5">Top-rated favorites from AZB Store</p>
+        </div>
+        {/* Buttons hidden on mobile, shown on desktop */}
+        <div className="hidden sm:flex items-center gap-1.5 sm:gap-2">
           <button 
-            onClick={scrollLeft}
-            className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100 transition-colors text-gray-600"
-            aria-label="Previous products"
+            onClick={prevSlide}
+            className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100 transition-colors text-gray-600 cursor-pointer shadow-xs"
+            aria-label="Previous 2 images"
           >
             <ChevronLeft size={18} />
           </button>
           <button 
-            onClick={scrollRight}
-            className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100 transition-colors text-gray-600"
-            aria-label="Next products"
+            onClick={nextSlide}
+            className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100 transition-colors text-gray-600 cursor-pointer shadow-xs"
+            aria-label="Next 2 images"
           >
             <ChevronRight size={18} />
           </button>
         </div>
       </div>
 
-      {/* Product Carousel */}
+      {/* Strictly 2 Images At A Time - Zero Peeking of Third Image */}
       <div 
-        ref={scrollContainerRef}
-        className="flex gap-3 sm:gap-4 md:gap-6 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-3 sm:pb-4"
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        className="w-full max-w-4xl mx-auto overflow-hidden rounded-xl sm:rounded-2xl"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
       >
-        {displayProducts.map((product) => (
-          <div 
-            key={product.uniqueId} 
-            className="w-[calc(50%-6px)] sm:w-[calc(33.333%-10.66px)] md:w-[calc(25%-18px)] lg:w-[calc(16.666%-20px)] flex-none snap-start group flex flex-col bg-white rounded-lg"
-          >
-            {/* Image Box */}
-            <div className="relative aspect-[4/5] bg-gray-100 rounded-lg overflow-hidden mb-2 sm:mb-3">
-              <img 
-                src={product.image} 
-                alt={product.title} 
-                className="w-full h-full object-cover mix-blend-multiply group-hover:scale-105 transition-transform duration-300"
-              />
-              <button 
-                onClick={() => isInWishlist(product.id) ? removeFromWishlist(product.id) : addToWishlist(product as unknown as Product)}
-                className={`absolute top-2 right-2 backdrop-blur-xs p-1.5 rounded shadow-sm transition-colors z-10 ${
-                  isInWishlist(product.id) ? 'bg-red-50 text-red-500' : 'bg-white/90 text-gray-400 hover:text-red-500'
-                }`}
-                aria-label="Add to wishlist"
-              >
-                <Heart size={16} fill={isInWishlist(product.id) ? "currentColor" : "none"} />
-              </button>
-            </div>
-            
-            {/* Details */}
-            <div className="flex flex-col flex-1">
-              <h3 className="font-bold text-xs sm:text-sm text-gray-900 line-clamp-2 leading-snug min-h-[32px] sm:min-h-[40px]">
-                {product.title}
-              </h3>
-              <p className="text-[11px] sm:text-xs text-gray-500 mt-0.5">{product.category}</p>
-              
-              <div className="mt-1 flex items-baseline gap-1.5 sm:gap-2 flex-wrap">
-                <span className="text-base sm:text-lg font-extrabold text-gray-900">₹{product.price}</span>
-                <span className="text-xs text-gray-400 line-through">₹{product.originalPrice}</span>
-                <span className="text-xs font-bold text-red-500">({product.discount})</span>
-              </div>
-              
-              <div className="mt-3 mt-auto">
-                {product.soldOut ? (
-                  <button className="w-full bg-black text-white px-3 py-1.5 rounded text-xs font-bold cursor-not-allowed opacity-90">
-                    Sold Out
-                  </button>
-                ) : (
-                  <button 
-                    onClick={() => addToCart(product as unknown as Product)}
-                    className="w-full bg-black text-white px-3 py-1.5 rounded text-xs font-bold hover:bg-gray-800 transition-colors cursor-pointer"
+        <div 
+          className={`flex ${isTransitioning ? 'transition-transform duration-700 ease-in-out' : ''}`}
+          style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+          onTransitionEnd={handleTransitionEnd}
+        >
+          {displayPairs.map((pair, slideIdx) => (
+            <div 
+              key={slideIdx} 
+              className="w-full min-w-full flex-none grid grid-cols-2 gap-3 sm:gap-5 p-1"
+            >
+              {pair.map((item, itemIdx) => (
+                <div key={`${item.id}-${slideIdx}-${itemIdx}`} className="group relative">
+                  <Link 
+                    href={item.link}
+                    className="block relative aspect-square sm:aspect-[4/5] bg-gray-50 rounded-xl sm:rounded-2xl overflow-hidden shadow-xs hover:shadow-md border border-gray-200/80 transition-all duration-300 group-hover:border-yellow-400"
                   >
-                    Add to Cart
-                  </button>
-                )}
-              </div>
+                    <img 
+                      src={item.image} 
+                      alt={item.title} 
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      loading="lazy"
+                    />
+                  </Link>
+                </div>
+              ))}
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
 
       {/* View All Button */}
-      <div className="flex justify-end mt-2 sm:mt-4">
-        <button className="px-5 py-1.5 sm:px-6 sm:py-2 border border-gray-300 rounded text-xs sm:text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors">
-          View All
-        </button>
+      <div className="flex justify-end mt-3 sm:mt-5 max-w-4xl mx-auto">
+        <Link 
+          href="/shop"
+          className="px-5 py-1.5 sm:px-6 sm:py-2 border border-gray-300 rounded text-xs sm:text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
+        >
+          View All Products
+        </Link>
       </div>
     </section>
   );

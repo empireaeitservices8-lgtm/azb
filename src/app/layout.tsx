@@ -17,6 +17,8 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+import { ensureImages } from "@/lib/syncImages";
+
 export const metadata: Metadata = {
   title: "AZB Store",
   description: "Your online mart for clothing and toys",
@@ -27,6 +29,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  ensureImages();
   return (
     <html
       lang="en"

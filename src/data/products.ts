@@ -2,7 +2,7 @@ export interface Product {
   id: number;
   title: string;
   category: string;
-  mainCategory: 'Kids' | 'Outfits' | 'Personalized Gifts' | 'Books' | 'Electronics';
+  mainCategory: 'Kids' | 'Outfits' | 'Personalized Gifts' | 'Books' | 'Electronics' | 'Daily Essentials';
   price: number;
   originalPrice: number;
   discount: string;
@@ -330,6 +330,30 @@ export const allProducts: Product[] = [
     soldOut: false,
     image: "https://picsum.photos/seed/electronics/400/500",
     tags: ["electronics", "earbuds", "wireless", "bluetooth", "audio"]
+  },
+  {
+    id: 27,
+    title: "Shoe Shine Wipes (80 Series Powerful Formula)",
+    category: "Daily Essentials, Shoe Care",
+    mainCategory: "Daily Essentials",
+    price: 180,
+    originalPrice: 249,
+    discount: "28% Off",
+    soldOut: false,
+    image: "/images/shoe_shine_wipes_banner.jpg",
+    tags: ["shoe", "shine", "wipes", "cleaning", "sneakers", "boots", "80series", "leather", "care", "instant clean"]
+  },
+  {
+    id: 28,
+    title: "7 in 1 Laundry Pod (20 Pods Cleaning Power)",
+    category: "Home Essentials, Laundry",
+    mainCategory: "Daily Essentials",
+    price: 200,
+    originalPrice: 399,
+    discount: "50% Off",
+    soldOut: false,
+    image: "/images/laundry_pod_banner.jpg",
+    tags: ["laundry", "pod", "detergent", "cleaning", "wash", "clothes", "fragrance", "7 in 1"]
   }
 ];
 

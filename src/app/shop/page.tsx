@@ -61,7 +61,7 @@ function ShopContent() {
     setFilteredProducts(result);
   }, [query, selectedCategory, sortBy]);
 
-  const categories = ['All', 'Kids', 'Outfits', 'Personalized Gifts', 'Books', 'Electronics'];
+  const categories = ['All', 'Kids', 'Daily Essentials', 'Personalized Gifts', 'Books', 'Electronics'];
 
   return (
     <div className="min-h-screen bg-gray-50 py-6 md:py-10">

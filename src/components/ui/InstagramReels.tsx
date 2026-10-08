@@ -11,6 +11,7 @@ interface ReelItem {
   discount: string;
   videoSrc: string;
   instagramUrl: string;
+  poster?: string;
 }
 
 const reelVideos: ReelItem[] = [
@@ -32,16 +33,18 @@ const reelVideos: ReelItem[] = [
     originalPrice: 399,
     discount: "50% Off",
     videoSrc: "/videos/reel3.mp4.mp4",
+    poster: "/images/laundry_pod_banner.jpg",
     instagramUrl: "https://www.instagram.com/"
   },
   {
     id: 102,
     title: "Shoe Shine Wipes",
     category: "Daily Essentials",
-    price: 149,
+    price: 180,
     originalPrice: 249,
-    discount: "40% Off",
+    discount: "28% Off",
     videoSrc: "/videos/reel2.mp4.mp4",
+    poster: "/images/shoe_shine_wipes_banner.jpg",
     instagramUrl: "https://www.instagram.com/"
   },
   {
@@ -150,6 +153,7 @@ export default function InstagramReels() {
               <video
                 ref={(el) => { videoRefs.current[reel.id] = el; }}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                poster={reel.poster}
                 loop
                 muted={mutedStates[reel.id] ?? true}
                 autoPlay

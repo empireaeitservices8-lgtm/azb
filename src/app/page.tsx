@@ -9,7 +9,10 @@ import OutfitsForYou from '@/components/ui/OutfitsForYou';
 import InstagramReels from '@/components/ui/InstagramReels';
 import Features from '@/components/ui/Features';
 
+import { ensureImages } from '@/lib/syncImages';
+
 export default function Home() {
+  ensureImages();
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Banner Slider */}
