@@ -6,8 +6,8 @@ import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { Product } from '@/data/products';
 
-// 8 completely unique kids products
-const products = [
+// 8 completely unique kids products with authentic kids images
+const defaultKidsOutfits = [
   {
     id: 1,
     title: "Rompers for Babies Upto 12 months",
@@ -16,7 +16,7 @@ const products = [
     originalPrice: 299,
     discount: "33% Off",
     soldOut: false,
-    image: "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?auto=format&fit=crop&q=80&w=400&h=500"
+    image: "https://images.unsplash.com/photo-1522771930-78848d9293e8?auto=format&fit=crop&w=600&q=80"
   },
   {
     id: 2,
@@ -26,7 +26,7 @@ const products = [
     originalPrice: 499,
     discount: "20% Off",
     soldOut: true,
-    image: "https://images.unsplash.com/photo-1622290291468-a28f7a7dc6a8?auto=format&fit=crop&q=80&w=400&h=500"
+    image: "https://images.unsplash.com/photo-1622290291468-a28f7a7dc6a8?auto=format&fit=crop&w=600&q=80"
   },
   {
     id: 3,
@@ -36,7 +36,7 @@ const products = [
     originalPrice: 299,
     discount: "33% Off",
     soldOut: false,
-    image: "https://images.unsplash.com/photo-1522771930-78848d9293e8?auto=format&fit=crop&q=80&w=400&h=500"
+    image: "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?auto=format&fit=crop&w=600&q=80"
   },
   {
     id: 4,
@@ -46,7 +46,7 @@ const products = [
     originalPrice: 399,
     discount: "13% Off",
     soldOut: false,
-    image: "https://images.unsplash.com/photo-1503919545889-aef636e10ad4?auto=format&fit=crop&q=80&w=400&h=500"
+    image: "https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?auto=format&fit=crop&w=600&q=80"
   },
   {
     id: 5,
@@ -56,7 +56,7 @@ const products = [
     originalPrice: 399,
     discount: "13% Off",
     soldOut: false,
-    image: "https://images.unsplash.com/photo-1604467794349-0b74285de7e7?auto=format&fit=crop&q=80&w=400&h=500"
+    image: "https://images.unsplash.com/photo-1514090458221-65bb69cf63e6?auto=format&fit=crop&w=600&q=80"
   },
   {
     id: 6,
@@ -66,7 +66,7 @@ const products = [
     originalPrice: 499,
     discount: "20% Off",
     soldOut: true,
-    image: "https://images.unsplash.com/photo-1518831959646-742c3a14ebf7?auto=format&fit=crop&q=80&w=400&h=500"
+    image: "https://images.unsplash.com/photo-1596870230751-ebdfce98ec42?auto=format&fit=crop&w=600&q=80"
   },
   {
     id: 7,
@@ -76,7 +76,7 @@ const products = [
     originalPrice: 499,
     discount: "40% Off",
     soldOut: false,
-    image: "https://images.unsplash.com/photo-1596870230751-ebdfce98ec42?auto=format&fit=crop&q=80&w=400&h=500"
+    image: "https://images.unsplash.com/photo-1519457431-44ccd64a579b?auto=format&fit=crop&w=600&q=80"
   },
   {
     id: 8,
@@ -86,27 +86,64 @@ const products = [
     originalPrice: 499,
     discount: "28% Off",
     soldOut: false,
-    image: "https://images.unsplash.com/photo-1519238263530-99bdd11df2ea?auto=format&fit=crop&q=80&w=400&h=500"
+    image: "https://images.unsplash.com/photo-1543332164-6e82f355badc?auto=format&fit=crop&w=600&q=80"
   }
 ];
 
-// Group items into pairs of exactly 2 items
-const pairs: typeof products[] = [];
-for (let i = 0; i < products.length; i += 2) {
-  pairs.push([products[i], products[i + 1]]);
-}
-
-// Append clone of pair 0 at the end for seamless infinite loop
-const displayPairs = [...pairs, pairs[0]];
-
 export default function OutfitsForKids() {
+  const [items, setItems] = useState<any[]>(defaultKidsOutfits);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(true);
   const touchStartX = useRef<number | null>(null);
   const { addToCart } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
 
+  // Load live products from WordPress
+  useEffect(() => {
+    async function load() {
+      try {
+        const res = await fetch('/api/products');
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.products && data.products.length >= 2) {
+            const outfitProducts = data.products.filter((p: any) => 
+              (p.category?.toLowerCase().includes('outfit') || p.category?.toLowerCase().includes('dress') || p.category?.toLowerCase().includes('romper')) &&
+              p.category?.toLowerCase().includes('kid')
+            );
+            if (outfitProducts.length >= 2) {
+              const list = outfitProducts.slice(0, 8);
+              setItems(list.map((p: any, idx: number) => ({
+                id: p.id,
+                title: p.title,
+                category: p.category || 'Kids Outfits',
+                price: p.price,
+                originalPrice: p.originalPrice || p.price,
+                discount: p.discount || '',
+                soldOut: !!p.soldOut,
+                image: (p.image && !p.image.includes('placeholder')) ? p.image : defaultKidsOutfits[idx % defaultKidsOutfits.length].image
+              })));
+            }
+          }
+        }
+      } catch (e) {
+        console.error('Failed to fetch kids outfits from WordPress:', e);
+      }
+    }
+    load();
+  }, []);
+
+  // Group items into pairs of exactly 2 items
+  const pairs: any[][] = [];
+  for (let i = 0; i < items.length; i += 2) {
+    if (items[i + 1]) {
+      pairs.push([items[i], items[i + 1]]);
+    } else {
+      pairs.push([items[i], items[0]]);
+    }
+  }
+
   const totalPairs = pairs.length;
+  const displayPairs = totalPairs > 0 ? [...pairs, pairs[0]] : [];
 
   const nextSlide = () => {
     setIsTransitioning(true);
@@ -156,7 +193,6 @@ export default function OutfitsForKids() {
           <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-black uppercase tracking-wide">
             FOR KIDS
           </h2>
-          <p className="text-[11px] sm:text-xs text-gray-500 mt-0.5">Adorable outfits & clothes for children</p>
         </div>
         {/* Buttons hidden on mobile, shown on desktop */}
         <div className="hidden sm:flex items-center gap-1.5 sm:gap-2">

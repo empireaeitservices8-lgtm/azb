@@ -1,11 +1,23 @@
 'use client';
 import React, { useState, useEffect, useRef } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import Link from 'next/link';
 
 const slides = [
-  "/images/banner1.jpg",
-  "/images/banner2.jpg",
-  "/images/banner3.jpg"
+  {
+    image: "/images/banner1.jpg",
+    title: "Happy Family Clothing & Toys",
+    link: "/shop"
+  },
+  {
+    image: "/images/banner2.jpg",
+    title: "Kids Funland Toys & Clothes",
+    link: "/shop?category=Kids"
+  },
+  {
+    image: "/images/banner3.jpg",
+    title: "Exclusive Offers & Gifts",
+    link: "/shop"
+  }
 ];
 
 export default function HeroSlider() {
@@ -50,7 +62,7 @@ export default function HeroSlider() {
 
   return (
     <section 
-      className="relative w-full h-[180px] sm:h-[300px] md:h-[450px] lg:h-[520px] overflow-hidden bg-gray-100"
+      className="relative w-full h-[180px] sm:h-[300px] md:h-[450px] lg:h-[520px] overflow-hidden bg-gray-950"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
@@ -59,33 +71,19 @@ export default function HeroSlider() {
         <div 
           key={index}
           className={`absolute top-0 left-0 w-full h-full transition-opacity duration-1000 ease-in-out ${
-            current === index ? 'opacity-100 z-10' : 'opacity-0 z-0'
+            current === index ? 'opacity-100 z-10 pointer-events-auto' : 'opacity-0 z-0 pointer-events-none'
           }`}
         >
-          <img 
-            src={slide} 
-            alt={`AZB Banner ${index + 1}`}
-            className="w-full h-full object-cover object-center"
-          />
+          <Link href={slide.link} className="block w-full h-full relative cursor-pointer">
+            <img 
+              src={slide.image} 
+              alt={slide.title}
+              className="w-full h-full object-cover object-center"
+              loading={index === 0 ? "eager" : "lazy"}
+            />
+          </Link>
         </div>
       ))}
-
-      {/* Navigation Arrows */}
-      <button 
-        onClick={prevSlide}
-        className="absolute left-2 sm:left-4 md:left-8 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-10 sm:h-10 md:w-14 md:h-14 bg-black/30 hover:bg-black/50 md:bg-white/40 md:hover:bg-white/60 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-all shadow-sm"
-        aria-label="Previous banner"
-      >
-        <ChevronLeft className="w-5 h-5 md:w-7 md:h-7" />
-      </button>
-
-      <button 
-        onClick={nextSlide}
-        className="absolute right-2 sm:right-4 md:right-8 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-10 sm:h-10 md:w-14 md:h-14 bg-black/30 hover:bg-black/50 md:bg-white/40 md:hover:bg-white/60 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-all shadow-sm"
-        aria-label="Next banner"
-      >
-        <ChevronRight className="w-5 h-5 md:w-7 md:h-7" />
-      </button>
 
       {/* Pagination Dots */}
       <div className="absolute bottom-2 sm:bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 sm:gap-2.5 z-20">
@@ -93,7 +91,7 @@ export default function HeroSlider() {
           <button
             key={index}
             onClick={() => setCurrent(index)}
-            className={`h-1.5 sm:h-2 rounded-full transition-all duration-300 shadow-sm ${
+            className={`h-1.5 sm:h-2 rounded-full transition-all duration-300 shadow-sm cursor-pointer ${
               current === index ? 'w-5 sm:w-6 bg-yellow-400' : 'w-1.5 sm:w-2 bg-white/70 hover:bg-white'
             }`}
             aria-label={`Go to slide ${index + 1}`}

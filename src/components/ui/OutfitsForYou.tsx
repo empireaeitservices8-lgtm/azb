@@ -6,8 +6,8 @@ import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { Product } from '@/data/products';
 
-// 8 completely unique women's outfits products
-const products = [
+// 8 completely unique girls and women dress products with authentic images
+const defaultWomenOutfits = [
   {
     id: 1,
     title: "MINUKKI Designer Kurti Set",
@@ -16,7 +16,7 @@ const products = [
     originalPrice: 999,
     discount: "45% Off",
     soldOut: false,
-    image: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&q=80&w=400&h=500"
+    image: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=600&q=80"
   },
   {
     id: 2,
@@ -26,7 +26,7 @@ const products = [
     originalPrice: 1699,
     discount: "50% Off",
     soldOut: false,
-    image: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&q=80&w=400&h=500"
+    image: "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=600&q=80"
   },
   {
     id: 3,
@@ -36,7 +36,7 @@ const products = [
     originalPrice: 1399,
     discount: "43% Off",
     soldOut: false,
-    image: "https://images.unsplash.com/photo-1605763240000-7e93b172d754?auto=format&fit=crop&q=80&w=400&h=500"
+    image: "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?auto=format&fit=crop&w=600&q=80"
   },
   {
     id: 4,
@@ -46,7 +46,7 @@ const products = [
     originalPrice: 999,
     discount: "40% Off",
     soldOut: true,
-    image: "https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&q=80&w=400&h=500"
+    image: "https://images.unsplash.com/photo-1566174053879-31528523f8ae?auto=format&fit=crop&w=600&q=80"
   },
   {
     id: 5,
@@ -56,7 +56,7 @@ const products = [
     originalPrice: 1499,
     discount: "47% Off",
     soldOut: false,
-    image: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&q=80&w=400&h=500"
+    image: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=600&q=80"
   },
   {
     id: 6,
@@ -66,7 +66,7 @@ const products = [
     originalPrice: 1599,
     discount: "44% Off",
     soldOut: false,
-    image: "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?auto=format&fit=crop&q=80&w=400&h=500"
+    image: "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?auto=format&fit=crop&w=600&q=80"
   },
   {
     id: 7,
@@ -76,7 +76,7 @@ const products = [
     originalPrice: 1899,
     discount: "47% Off",
     soldOut: false,
-    image: "https://images.unsplash.com/photo-1566737236500-c8ac43014a67?auto=format&fit=crop&q=80&w=400&h=500"
+    image: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&w=600&q=80"
   },
   {
     id: 8,
@@ -86,27 +86,70 @@ const products = [
     originalPrice: 1699,
     discount: "47% Off",
     soldOut: false,
-    image: "https://images.unsplash.com/photo-1585487000160-6ebcfceb0d03?auto=format&fit=crop&q=80&w=400&h=500"
+    image: "https://images.unsplash.com/photo-1609357605129-26f69add5d6e?auto=format&fit=crop&w=600&q=80"
   }
 ];
 
-// Group items into pairs of exactly 2 items
-const pairs: typeof products[] = [];
-for (let i = 0; i < products.length; i += 2) {
-  pairs.push([products[i], products[i + 1]]);
-}
-
-// Append clone of pair 0 at the end for seamless infinite loop
-const displayPairs = [...pairs, pairs[0]];
-
 export default function OutfitsForYou() {
+  const [items, setItems] = useState<any[]>(defaultWomenOutfits);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(true);
   const touchStartX = useRef<number | null>(null);
   const { addToCart } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
 
+  // Load live products from WordPress
+  useEffect(() => {
+    async function load() {
+      try {
+        const res = await fetch('/api/products');
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.products && data.products.length >= 2) {
+            const womenOutfits = data.products.filter((p: any) => 
+              (p.category?.toLowerCase().includes('outfit') || 
+               p.category?.toLowerCase().includes('kurti') || 
+               p.category?.toLowerCase().includes('saree') || 
+               p.category?.toLowerCase().includes('women') || 
+               p.category?.toLowerCase().includes('ethnic')) &&
+              !p.category?.toLowerCase().includes('kid') &&
+              !p.category?.toLowerCase().includes('shoe') &&
+              !p.category?.toLowerCase().includes('laundry')
+            );
+            if (womenOutfits.length >= 2) {
+              const list = womenOutfits.slice(0, 8);
+              setItems(list.map((p: any, idx: number) => ({
+                id: p.id,
+                title: p.title,
+                category: p.category || 'Outfits',
+                price: p.price,
+                originalPrice: p.originalPrice || p.price,
+                discount: p.discount || '',
+                soldOut: !!p.soldOut,
+                image: (p.image && !p.image.includes('placeholder')) ? p.image : defaultWomenOutfits[idx % defaultWomenOutfits.length].image
+              })));
+            }
+          }
+        }
+      } catch (e) {
+        console.error('Failed to fetch outfits from WordPress:', e);
+      }
+    }
+    load();
+  }, []);
+
+  // Group items into pairs of exactly 2 items
+  const pairs: any[][] = [];
+  for (let i = 0; i < items.length; i += 2) {
+    if (items[i + 1]) {
+      pairs.push([items[i], items[i + 1]]);
+    } else {
+      pairs.push([items[i], items[0]]);
+    }
+  }
+
   const totalPairs = pairs.length;
+  const displayPairs = totalPairs > 0 ? [...pairs, pairs[0]] : [];
 
   const nextSlide = () => {
     setIsTransitioning(true);
@@ -156,7 +199,6 @@ export default function OutfitsForYou() {
           <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 uppercase tracking-wide">
             FOR YOU
           </h2>
-          <p className="text-[11px] sm:text-xs text-gray-500 mt-0.5">Fashion & stylish apparel crafted for you</p>
         </div>
         {/* Buttons hidden on mobile, shown on desktop */}
         <div className="hidden sm:flex items-center gap-1.5 sm:gap-2">

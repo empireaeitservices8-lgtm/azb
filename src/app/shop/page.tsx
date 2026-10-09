@@ -18,7 +18,30 @@ function ShopContent() {
   const [query, setQuery] = useState(initialQuery);
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const [sortBy, setSortBy] = useState<'featured' | 'price-low' | 'price-high'>('featured');
+  const [baseProducts, setBaseProducts] = useState<Product[]>(allProducts);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>(allProducts);
+  const [loading, setLoading] = useState(false);
+
+  // Fetch live products from WooCommerce API
+  useEffect(() => {
+    async function loadProducts() {
+      try {
+        setLoading(true);
+        const res = await fetch('/api/products');
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.products && data.products.length > 0) {
+            setBaseProducts(data.products);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load products from API:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadProducts();
+  }, []);
 
   // Sync state if URL search query changes
   useEffect(() => {
@@ -29,7 +52,7 @@ function ShopContent() {
   }, [searchParams]);
 
   useEffect(() => {
-    let result = [...allProducts];
+    let result = [...baseProducts];
 
     // Filter by search query
     if (query.trim()) {
@@ -59,9 +82,28 @@ function ShopContent() {
     }
 
     setFilteredProducts(result);
-  }, [query, selectedCategory, sortBy]);
+  }, [baseProducts, query, selectedCategory, sortBy]);
 
-  const categories = ['All', 'Kids', 'Daily Essentials', 'Personalized Gifts', 'Books', 'Electronics'];
+  const categories = [
+    'All',
+    'Kids',
+    'Women',
+    'Outfits',
+    'Ethnic',
+    'Shoe Care',
+    'Laundry',
+    'Daily Essentials',
+    'Home Essentials',
+    'Personalized Gifts',
+    'Toys',
+    'Educational Toys',
+    'Games',
+    'Stationery',
+    'Books & Kits',
+    'PSC Books',
+    'Sports',
+    'Electronics'
+  ];
 
   return (
     <div className="min-h-screen bg-gray-50 py-6 md:py-10">

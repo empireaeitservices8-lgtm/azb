@@ -10,8 +10,11 @@ export default function OfferZone() {
         <span className="text-yellow-500">ZONE</span>
       </h2>
 
-      {/* Banner */}
-      <Link href="/shop" className="block relative w-full h-[150px] sm:h-[220px] md:h-[280px] lg:h-[350px] rounded-xl sm:rounded-2xl overflow-hidden shadow-sm group">
+      {/* Original Offer Zone Banner */}
+      <Link 
+        href="/shop" 
+        className="block relative w-full h-[150px] sm:h-[220px] md:h-[280px] lg:h-[350px] rounded-xl sm:rounded-2xl overflow-hidden shadow-sm group"
+      >
         <img 
           src="/images/offer_banner.jpg" 
           alt="Offer Zone Banner" 

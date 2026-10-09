@@ -1,7 +1,18 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'lightcyan-gorilla-655722.hostingersite.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.hostingersite.com',
+      },
+    ],
+  },
 };
 
 export default nextConfig;
