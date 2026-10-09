@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Search, User, Heart, ShoppingCart, MapPin, Menu, X, Navigation, Phone, ChevronRight, ArrowRight } from 'lucide-react';
+import { Search, User, Heart, ShoppingCart, MapPin, Menu, X, Navigation, Phone, Mail, ChevronRight, ArrowRight } from 'lucide-react';
 import { searchProducts, Product } from '@/data/products';
 import { useCart } from '@/contexts/CartContext';
 
@@ -126,7 +126,7 @@ export default function Header() {
   };
 
   return (
-    <header className="w-full sticky top-0 z-40 shadow-md">
+    <header className="w-full sticky top-0 z-50 shadow-md">
       {/* Top Row: Logo, Search, User actions */}
       <div className="bg-black">
         <div className="container mx-auto px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 flex items-center justify-between gap-3 sm:gap-6">
@@ -425,7 +425,7 @@ export default function Header() {
 
       {/* Mobile Drawer Navigation */}
       {isMobileMenuOpen && (
-        <div className="fixed inset-0 z-50 md:hidden flex">
+        <div className="fixed inset-0 z-[60] md:hidden flex">
           {/* Backdrop */}
           <div 
             className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity"
@@ -574,15 +574,26 @@ export default function Header() {
             </div>
 
             {/* Drawer Footer Contact */}
-            <div className="p-4 bg-gray-50 border-t border-gray-200">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center">
+            <div className="p-4 bg-gray-50 border-t border-gray-200 space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center shrink-0">
                   <Phone size={14} />
                 </div>
                 <div>
                   <p className="text-[11px] text-gray-500">Need help? Call 24/7</p>
-                  <a href="tel:+917306139947" className="text-xs font-bold text-gray-900">
-                    +917306139947
+                  <a href="tel:+919072525292" className="text-xs font-bold text-gray-900">
+                    +91 9072525292
+                  </a>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-yellow-500 text-black flex items-center justify-center shrink-0">
+                  <Mail size={14} />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[11px] text-gray-500">Email us</p>
+                  <a href="mailto:azbstoreofficial@gmail.com" className="text-xs font-bold text-gray-900 truncate block">
+                    azbstoreofficial@gmail.com
                   </a>
                 </div>
               </div>
@@ -593,7 +604,7 @@ export default function Header() {
 
       {/* Location Modal */}
       {isLocationModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
             <div className="bg-black text-white px-5 sm:px-6 py-4 flex items-center justify-between">
               <h3 className="font-bold text-base sm:text-lg flex items-center gap-2">

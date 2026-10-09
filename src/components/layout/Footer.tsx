@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 import Link from 'next/link';
-import { Phone, ChevronUp } from 'lucide-react';
+import { Phone, Mail, ChevronUp } from 'lucide-react';
 
 export default function Footer() {
   const scrollToTop = () => {
@@ -22,15 +22,29 @@ export default function Footer() {
               />
             </div>
             
-            <div className="flex items-center gap-3 sm:gap-4">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white rounded-full flex items-center justify-center text-black shadow-sm flex-shrink-0">
-                <Phone size={18} fill="currentColor" />
+            <div className="space-y-4">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white rounded-full flex items-center justify-center text-black shadow-sm flex-shrink-0">
+                  <Phone size={18} fill="currentColor" />
+                </div>
+                <div>
+                  <p className="text-white/80 text-xs sm:text-sm mb-0.5">Have Questions? Call Us 24/7</p>
+                  <a href="tel:+919072525292" className="text-lg sm:text-xl font-bold text-white hover:text-yellow-400 transition-colors">
+                    +91 9072525292
+                  </a>
+                </div>
               </div>
-              <div>
-                <p className="text-white/80 text-xs sm:text-sm mb-0.5">Have Questions? Call Us 24/7</p>
-                <a href="tel:+917306139947" className="text-lg sm:text-xl font-bold text-white hover:text-yellow-400 transition-colors">
-                  +917306139947
-                </a>
+
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white rounded-full flex items-center justify-center text-black shadow-sm flex-shrink-0">
+                  <Mail size={18} />
+                </div>
+                <div>
+                  <p className="text-white/80 text-xs sm:text-sm mb-0.5">Email Support</p>
+                  <a href="mailto:azbstoreofficial@gmail.com" className="text-sm sm:text-base font-bold text-white hover:text-yellow-400 transition-colors">
+                    azbstoreofficial@gmail.com
+                  </a>
+                </div>
               </div>
             </div>
             
@@ -117,7 +131,7 @@ export default function Footer() {
           <ChevronUp size={20} className="sm:w-6 sm:h-6" />
         </button>
         <a 
-          href="https://wa.me/917306139947" 
+          href="https://wa.me/919072525292" 
           target="_blank" 
           rel="noopener noreferrer"
           className="w-10 h-10 sm:w-12 sm:h-12 bg-yellow-500 rounded-full shadow-lg flex items-center justify-center text-black hover:bg-yellow-400 hover:scale-105 transition-all"

@@ -6,7 +6,7 @@ import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { Product } from '@/data/products';
 
-// 8 completely unique girls and women dress products with authentic images
+// 8 unique women dress products with authentic images
 const defaultWomenOutfits = [
   {
     id: 1,
@@ -95,6 +95,8 @@ export default function OutfitsForYou() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(true);
   const touchStartX = useRef<number | null>(null);
+  const desktopScrollRef = useRef<HTMLDivElement>(null);
+
   const { addToCart } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
 
@@ -138,7 +140,7 @@ export default function OutfitsForYou() {
     load();
   }, []);
 
-  // Group items into pairs of exactly 2 items
+  // Group items into pairs of exactly 2 items for Mobile view
   const pairs: any[][] = [];
   for (let i = 0; i < items.length; i += 2) {
     if (items[i + 1]) {
@@ -168,10 +170,15 @@ export default function OutfitsForYou() {
     }
   };
 
+  // 7-second automatic swipe for both Mobile & Desktop Views
   useEffect(() => {
     const timer = setInterval(() => {
-      nextSlide();
-    }, 5000);
+      if (typeof window !== 'undefined' && window.innerWidth < 768) {
+        nextSlide();
+      } else {
+        scrollDesktop('next');
+      }
+    }, 7000);
 
     return () => clearInterval(timer);
   }, [totalPairs]);
@@ -191,37 +198,162 @@ export default function OutfitsForYou() {
     touchStartX.current = null;
   };
 
+  // Desktop Carousel Scroll Navigation
+  const scrollDesktop = (direction: 'prev' | 'next') => {
+    if (desktopScrollRef.current) {
+      const container = desktopScrollRef.current;
+      const firstCard = container.firstElementChild as HTMLElement | null;
+      const cardWidth = firstCard ? firstCard.offsetWidth + 16 : 240;
+      const maxScroll = container.scrollWidth - container.clientWidth;
+
+      if (direction === 'next') {
+        if (container.scrollLeft >= maxScroll - 10) {
+          container.scrollTo({ left: 0, behavior: 'smooth' });
+        } else {
+          container.scrollBy({ left: cardWidth, behavior: 'smooth' });
+        }
+      } else {
+        if (container.scrollLeft <= 10) {
+          container.scrollTo({ left: maxScroll, behavior: 'smooth' });
+        } else {
+          container.scrollBy({ left: -cardWidth, behavior: 'smooth' });
+        }
+      }
+    }
+  };
+
+  const handlePrev = () => {
+    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+      prevSlide();
+    } else {
+      scrollDesktop('prev');
+    }
+  };
+
+  const handleNext = () => {
+    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+      nextSlide();
+    } else {
+      scrollDesktop('next');
+    }
+  };
+
   return (
     <section className="container mx-auto px-4 sm:px-6 md:px-8 py-8 md:py-12">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4 sm:mb-6">
+      <div className="flex items-center justify-between mb-5 sm:mb-6">
         <div>
-          <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 uppercase tracking-wide">
+          <h2 className="text-xl sm:text-2xl font-extrabold text-gray-900 uppercase tracking-wide">
             FOR YOU
           </h2>
         </div>
-        {/* Buttons hidden on mobile, shown on desktop */}
-        <div className="hidden sm:flex items-center gap-1.5 sm:gap-2">
+        {/* Navigation circular arrows */}
+        <div className="flex items-center gap-2">
           <button 
-            onClick={prevSlide}
-            className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100 transition-colors text-gray-600 cursor-pointer shadow-xs"
-            aria-label="Previous 2 products"
+            onClick={handlePrev}
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-gray-300 bg-white flex items-center justify-center hover:border-gray-500 hover:bg-gray-50 text-gray-700 transition-colors cursor-pointer shadow-xs"
+            aria-label="Previous products"
           >
             <ChevronLeft size={18} />
           </button>
           <button 
-            onClick={nextSlide}
-            className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100 transition-colors text-gray-600 cursor-pointer shadow-xs"
-            aria-label="Next 2 products"
+            onClick={handleNext}
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-gray-300 bg-white flex items-center justify-center hover:border-gray-500 hover:bg-gray-50 text-gray-700 transition-colors cursor-pointer shadow-xs"
+            aria-label="Next products"
           >
             <ChevronRight size={18} />
           </button>
         </div>
       </div>
 
-      {/* Strictly 2 Products At A Time - Zero Peeking of Third Product */}
+      {/* 1. Laptop / Desktop View (Row of 5 Products Matching Reference Image) */}
+      <div className="hidden md:block">
+        <div 
+          ref={desktopScrollRef}
+          className="flex items-start gap-4 lg:gap-5 overflow-x-auto scroll-smooth scrollbar-hide py-1"
+        >
+          {items.map((product) => (
+            <div 
+              key={product.id}
+              className="w-[calc((100%-48px)/4)] lg:w-[calc((100%-80px)/5)] shrink-0 flex flex-col group"
+            >
+              {/* Image Box */}
+              <div className="relative aspect-square w-full bg-gray-50 rounded-2xl overflow-hidden shadow-2xs">
+                <Link href="/shop" className="block w-full h-full">
+                  <img 
+                    src={product.image} 
+                    alt={product.title} 
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    loading="lazy"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=600&q=80';
+                    }}
+                  />
+                </Link>
+
+                {/* Wishlist Button */}
+                <button 
+                  onClick={() => isInWishlist(Number(product.id)) ? removeFromWishlist(Number(product.id)) : addToWishlist(product as unknown as Product)}
+                  className={`absolute top-2.5 right-2.5 w-9 h-9 rounded-xl flex items-center justify-center backdrop-blur-xs shadow-xs transition-all z-10 cursor-pointer ${
+                    isInWishlist(Number(product.id))
+                      ? 'bg-red-50 text-red-500 ring-1 ring-red-300'
+                      : 'bg-white/95 text-gray-400 hover:text-red-500 hover:bg-white'
+                  }`}
+                  aria-label="Wishlist"
+                  title={isInWishlist(Number(product.id)) ? "Remove from wishlist" : "Add to wishlist"}
+                >
+                  <Heart size={16} fill={isInWishlist(Number(product.id)) ? "currentColor" : "none"} />
+                </button>
+              </div>
+
+              {/* Details */}
+              <div className="flex flex-col mt-3">
+                <Link href="/shop" className="hover:text-yellow-600 transition-colors">
+                  <h3 className="font-bold text-sm text-gray-900 line-clamp-1 leading-snug">
+                    {product.title}
+                  </h3>
+                </Link>
+                <p className="text-xs text-gray-400 font-medium mt-0.5">{product.category}</p>
+                
+                <div className="mt-1 flex items-baseline gap-1.5 flex-wrap">
+                  <span className="text-base lg:text-lg font-bold text-gray-900">₹{product.price}</span>
+                  {product.originalPrice && product.originalPrice > product.price && (
+                    <span className="text-xs text-gray-400 line-through font-normal">₹{product.originalPrice}</span>
+                  )}
+                  {product.discount && (
+                    <span className="text-xs font-bold text-red-500">({product.discount})</span>
+                  )}
+                </div>
+
+                {/* Action Button: Add to Cart / Sold Out */}
+                <div className="mt-2.5">
+                  {product.soldOut ? (
+                    <button 
+                      disabled
+                      className="bg-[#1e2d3d] text-white text-xs font-semibold px-4 py-1.5 rounded-lg opacity-85 cursor-not-allowed"
+                    >
+                      Sold Out
+                    </button>
+                  ) : (
+                    <button 
+                      onClick={() => addToCart(product as unknown as Product)}
+                      className="bg-[#1e2d3d] hover:bg-[#15202b] text-white text-xs font-semibold px-4 py-1.5 rounded-lg transition-colors cursor-pointer"
+                      title="Add to Cart"
+                    >
+                      Add to Cart
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* 2. Mobile View (2 Products at a time with 5s swipe & touch gestures) */}
       <div 
-        className="w-full max-w-4xl mx-auto overflow-hidden rounded-xl sm:rounded-2xl"
+        className="block md:hidden w-full overflow-hidden rounded-xl"
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
@@ -233,54 +365,74 @@ export default function OutfitsForYou() {
           {displayPairs.map((pair, slideIdx) => (
             <div 
               key={slideIdx} 
-              className="w-full min-w-full flex-none grid grid-cols-2 gap-3 sm:gap-5 p-1"
+              className="w-full min-w-full flex-none grid grid-cols-2 gap-3 p-1"
             >
               {pair.map((product, pIdx) => (
                 <div 
                   key={`${product.id}-${slideIdx}-${pIdx}`} 
-                  className="flex flex-col bg-white rounded-xl border border-gray-100 shadow-xs hover:shadow-md transition-shadow p-2 sm:p-3"
+                  className="flex flex-col bg-white rounded-xl border border-gray-100 p-2.5 shadow-2xs group"
                 >
                   {/* Image Box */}
-                  <div className="relative aspect-[4/5] bg-gray-100 rounded-lg overflow-hidden mb-2 sm:mb-3">
-                    <img 
-                      src={product.image} 
-                      alt={product.title} 
-                      className="w-full h-full object-cover mix-blend-multiply group-hover:scale-105 transition-transform duration-300"
-                      loading="lazy"
-                    />
+                  <div className="relative aspect-square w-full bg-gray-50 rounded-lg overflow-hidden mb-2">
+                    <Link href="/shop" className="block w-full h-full">
+                      <img 
+                        src={product.image} 
+                        alt={product.title} 
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=600&q=80';
+                        }}
+                      />
+                    </Link>
+                    
+                    {/* Wishlist Button */}
                     <button 
                       onClick={() => isInWishlist(Number(product.id)) ? removeFromWishlist(Number(product.id)) : addToWishlist(product as unknown as Product)}
-                      className={`absolute top-2 right-2 backdrop-blur-xs p-1.5 rounded shadow-sm transition-colors z-10 cursor-pointer ${
-                        isInWishlist(Number(product.id)) ? 'bg-red-50 text-red-500' : 'bg-white/90 text-gray-400 hover:text-red-500'
+                      className={`absolute top-1.5 right-1.5 p-1.5 rounded-lg backdrop-blur-xs shadow-xs transition-all z-10 cursor-pointer ${
+                        isInWishlist(Number(product.id)) 
+                          ? 'bg-red-50 text-red-500 ring-1 ring-red-300' 
+                          : 'bg-white/95 text-gray-400 hover:text-red-500'
                       }`}
-                      aria-label="Add to wishlist"
+                      aria-label="Wishlist"
                     >
-                      <Heart size={16} fill={isInWishlist(Number(product.id)) ? "currentColor" : "none"} />
+                      <Heart size={14} fill={isInWishlist(Number(product.id)) ? "currentColor" : "none"} />
                     </button>
                   </div>
                   
                   {/* Details */}
                   <div className="flex flex-col flex-1">
-                    <h3 className="font-bold text-xs sm:text-sm text-gray-900 line-clamp-2 leading-snug min-h-[32px] sm:min-h-[40px]">
-                      {product.title}
-                    </h3>
-                    <p className="text-[11px] sm:text-xs text-gray-500 mt-0.5">{product.category}</p>
+                    <Link href="/shop">
+                      <h3 className="font-bold text-xs text-gray-900 line-clamp-1 leading-snug">
+                        {product.title}
+                      </h3>
+                    </Link>
+                    <p className="text-[11px] text-gray-400 mt-0.5">{product.category}</p>
                     
-                    <div className="mt-1 flex items-baseline gap-1.5 sm:gap-2 flex-wrap">
-                      <span className="text-base sm:text-lg font-extrabold text-gray-900">₹{product.price}</span>
-                      <span className="text-xs text-gray-400 line-through">₹{product.originalPrice}</span>
-                      <span className="text-xs font-bold text-red-500">({product.discount})</span>
+                    <div className="mt-1 flex items-baseline gap-1 flex-wrap">
+                      <span className="text-sm font-bold text-gray-900">₹{product.price}</span>
+                      {product.originalPrice && product.originalPrice > product.price && (
+                        <span className="text-[11px] text-gray-400 line-through">₹{product.originalPrice}</span>
+                      )}
+                      {product.discount && (
+                        <span className="text-[10px] font-bold text-red-500">({product.discount})</span>
+                      )}
                     </div>
                     
-                    <div className="mt-3 mt-auto">
+                    {/* Action Button: Add to Cart / Sold Out */}
+                    <div className="mt-2.5 mt-auto">
                       {product.soldOut ? (
-                        <button className="w-full bg-black text-white px-3 py-1.5 rounded text-xs font-bold cursor-not-allowed opacity-90">
+                        <button 
+                          disabled
+                          className="w-full bg-[#1e2d3d] text-white py-1.5 px-2 rounded-lg text-xs font-semibold opacity-85 cursor-not-allowed"
+                        >
                           Sold Out
                         </button>
                       ) : (
                         <button 
                           onClick={() => addToCart(product as unknown as Product)}
-                          className="w-full bg-black text-white px-3 py-1.5 rounded text-xs font-bold hover:bg-gray-800 transition-colors cursor-pointer"
+                          className="w-full bg-[#1e2d3d] hover:bg-[#15202b] text-white py-1.5 px-2 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
                         >
                           Add to Cart
                         </button>
@@ -292,16 +444,6 @@ export default function OutfitsForYou() {
             </div>
           ))}
         </div>
-      </div>
-
-      {/* View All Button */}
-      <div className="flex justify-end mt-3 sm:mt-5 max-w-4xl mx-auto">
-        <Link 
-          href="/shop"
-          className="px-5 py-1.5 sm:px-6 sm:py-2 border border-gray-300 rounded text-xs sm:text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
-        >
-          View All
-        </Link>
       </div>
     </section>
   );

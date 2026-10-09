@@ -41,8 +41,8 @@ export default function ContactPage() {
               </div>
               <h3 className="text-xl font-bold text-black mb-2">Call Us</h3>
               <p className="text-gray-500 mb-4 text-sm">We are available 24/7 to answer your queries.</p>
-              <a href="tel:+917306139947" className="text-lg font-bold text-yellow-600 hover:text-yellow-500 transition-colors">
-                +91 7306139947
+              <a href="tel:+919072525292" className="text-lg font-bold text-yellow-600 hover:text-yellow-500 transition-colors">
+                +91 9072525292
               </a>
             </div>
 
@@ -53,8 +53,8 @@ export default function ContactPage() {
               </div>
               <h3 className="text-xl font-bold text-black mb-2">Email Us</h3>
               <p className="text-gray-500 mb-4 text-sm">Send us an email and we'll reply within 24 hours.</p>
-              <a href="mailto:support@azbstore.com" className="text-lg font-bold text-yellow-600 hover:text-yellow-500 transition-colors">
-                support@azbstore.com
+              <a href="mailto:azbstoreofficial@gmail.com" className="text-lg font-bold text-yellow-600 hover:text-yellow-500 transition-colors">
+                azbstoreofficial@gmail.com
               </a>
             </div>
 
