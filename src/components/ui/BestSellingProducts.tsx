@@ -124,21 +124,33 @@ export default function BestSellingProducts() {
         const res = await fetch('/api/products');
         if (res.ok) {
           const data = await res.json();
-          if (data?.products && data.products.length >= 2) {
-            const shoeWipes = defaultBestSellingProducts[0];
-            const laundryPod = defaultBestSellingProducts[1];
+          if (data?.products && data.products.length > 0) {
+            const liveItems: BestSellingProductItem[] = data.products.map((p: any) => ({
+              id: p.id,
+              title: p.title,
+              category: p.category,
+              price: p.price,
+              originalPrice: p.originalPrice || p.price,
+              discount: p.discount || '',
+              soldOut: !!p.soldOut,
+              image: p.image
+            }));
 
-            const seenImages = new Set<string>([shoeWipes.image, laundryPod.image]);
-            const remaining: BestSellingProductItem[] = [];
+            // Deduplicate products by both unique ID and title
+            const seenIds = new Set<number>();
+            const seenTitles = new Set<string>();
+            const uniqueList: BestSellingProductItem[] = [];
 
-            for (const p of defaultBestSellingProducts.slice(2)) {
-              if (!seenImages.has(p.image)) {
-                seenImages.add(p.image);
-                remaining.push(p);
+            for (const item of [...liveItems, ...defaultBestSellingProducts]) {
+              const titleKey = item.title.toLowerCase().trim();
+              if (!seenIds.has(item.id) && !seenTitles.has(titleKey)) {
+                seenIds.add(item.id);
+                seenTitles.add(titleKey);
+                uniqueList.push(item);
               }
             }
 
-            setItems([shoeWipes, laundryPod, ...remaining]);
+            setItems(uniqueList.slice(0, 10));
           }
         }
       } catch (e) {
@@ -280,9 +292,9 @@ export default function BestSellingProducts() {
           ref={desktopScrollRef}
           className="flex items-start gap-4 lg:gap-5 overflow-x-auto scroll-smooth scrollbar-hide py-1"
         >
-          {items.map((product) => (
+          {items.map((product, idx) => (
             <div 
-              key={product.id}
+              key={`desktop-bsp-${product.id}-${idx}`}
               className="w-[calc((100%-48px)/4)] lg:w-[calc((100%-80px)/5)] shrink-0 flex flex-col group"
             >
               {/* Image Box */}

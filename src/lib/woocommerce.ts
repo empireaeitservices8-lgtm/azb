@@ -30,7 +30,7 @@ export async function fetchWCProducts(params: Record<string, string | number> = 
     });
 
     const res = await fetch(`${STORE_URL}/wp-json/wc/v3/products?${searchParams.toString()}`, {
-      next: { revalidate: 60 }
+      cache: 'no-store'
     });
 
     if (!res.ok) {
@@ -55,13 +55,37 @@ export async function fetchWCCategories() {
     });
 
     const res = await fetch(`${STORE_URL}/wp-json/wc/v3/products/categories?${searchParams.toString()}`, {
-      next: { revalidate: 120 }
+      cache: 'no-store'
     });
 
     if (!res.ok) return [];
     return await res.json();
   } catch (err) {
     console.error('Failed to fetch categories from WooCommerce:', err);
+    return [];
+  }
+}
+
+export interface WCMediaItem {
+  id: number;
+  source_url: string;
+  title: { rendered: string };
+  alt_text?: string;
+  media_type?: string;
+  mime_type?: string;
+}
+
+export async function fetchWCMedia(): Promise<WCMediaItem[]> {
+  try {
+    const res = await fetch(`${STORE_URL}/wp-json/wp/v2/media?per_page=100`, {
+      cache: 'no-store'
+    });
+
+    if (!res.ok) return [];
+    const data = await res.json();
+    return Array.isArray(data) ? data : [];
+  } catch (err) {
+    console.error('Failed to fetch media from WordPress:', err);
     return [];
   }
 }

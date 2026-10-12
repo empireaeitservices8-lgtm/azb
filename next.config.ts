@@ -5,11 +5,15 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
+        hostname: '**.hostingersite.com',
+      },
+      {
+        protocol: 'https',
         hostname: 'lightcyan-gorilla-655722.hostingersite.com',
       },
       {
         protocol: 'https',
-        hostname: '*.hostingersite.com',
+        hostname: 'images.unsplash.com',
       },
     ],
   },

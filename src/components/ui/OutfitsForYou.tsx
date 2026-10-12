@@ -272,9 +272,9 @@ export default function OutfitsForYou() {
           ref={desktopScrollRef}
           className="flex items-start gap-4 lg:gap-5 overflow-x-auto scroll-smooth scrollbar-hide py-1"
         >
-          {items.map((product) => (
+          {items.map((product, idx) => (
             <div 
-              key={product.id}
+              key={`desktop-ofy-${product.id}-${idx}`}
               className="w-[calc((100%-48px)/4)] lg:w-[calc((100%-80px)/5)] shrink-0 flex flex-col group"
             >
               {/* Image Box */}
