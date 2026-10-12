@@ -1,6 +1,6 @@
 const STORE_URL = process.env.NEXT_PUBLIC_WC_STORE_URL || process.env.NEXT_PUBLIC_WORDPRESS_URL || 'https://lightcyan-gorilla-655722.hostingersite.com';
-const CONSUMER_KEY = process.env.WC_CONSUMER_KEY || '';
-const CONSUMER_SECRET = process.env.WC_CONSUMER_SECRET || '';
+const CONSUMER_KEY = process.env.WC_CONSUMER_KEY || 'ck_e497e69c0680d9054f73f8b36238746212d1fe2c';
+const CONSUMER_SECRET = process.env.WC_CONSUMER_SECRET || 'cs_9bb054c8d61c59efce9e1c637c2f344d9ba6bd7e';
 
 export interface WCProduct {
   id: number;
