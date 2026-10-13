@@ -114,7 +114,7 @@ export default function Footer() {
           </div>
 
           <p className="text-white/70 text-[11px] sm:text-xs text-center md:absolute md:left-1/2 md:-translate-x-1/2">
-            Copyright 2026 © <span className="font-semibold text-white">AZB Store</span>. v1.1.5 | All rights Reserved | Powered by <a href="#" className="font-semibold text-white hover:underline">riolabz</a>
+            Copyright 2026 © <span className="font-semibold text-white">AZB Store</span>. v1.1.5 | All rights Reserved
           </p>
           
           <div className="hidden md:block w-32"></div>
