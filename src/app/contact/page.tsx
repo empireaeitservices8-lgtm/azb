@@ -65,9 +65,9 @@ export default function ContactPage() {
               </div>
               <h3 className="text-xl font-bold text-white mb-2">Our Headquarters</h3>
               <p className="text-gray-400 mb-4 text-sm leading-relaxed">
-                AZB Store HQ<br/>
-                123 Commerce Avenue, Tech Park<br/>
-                New Delhi, India 110001
+                AZB Store<br/>
+                Karunagappally<br/>
+                Kollam
               </p>
               <div className="flex items-center justify-center gap-2 text-yellow-500 text-sm font-medium mt-2">
                 <Clock size={16} />

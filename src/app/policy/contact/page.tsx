@@ -53,9 +53,9 @@ export default function ContactPolicyPage() {
           <div>
             <h2 className='text-sm font-semibold text-gray-500 uppercase tracking-wider'>Office Address</h2>
             <p className='text-sm font-medium text-gray-800 mt-0.5 leading-relaxed'>
-              AZB Store HQ<br />
-              123 Commerce Avenue, Tech Park<br />
-              New Delhi, India 110001
+              AZB Store<br />
+              Karunagappally<br />
+              Kollam
             </p>
           </div>
         </div>
