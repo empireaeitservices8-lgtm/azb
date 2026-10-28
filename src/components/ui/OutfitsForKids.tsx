@@ -1,97 +1,15 @@
 'use client';
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Heart, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { Product } from '@/data/products';
 
-// 8 unique kids outfit products
-const defaultKidsOutfits = [
-  {
-    id: 1,
-    title: "Rompers for Babies Upto 12 months",
-    category: "Kids, Outfits",
-    price: 199,
-    originalPrice: 299,
-    discount: "33% Off",
-    soldOut: false,
-    image: "https://images.unsplash.com/photo-1522771930-78848d9293e8?auto=format&fit=crop&w=600&q=80"
-  },
-  {
-    id: 2,
-    title: "Kitty Premium Girl Long Polo Frock (5-10 Years)",
-    category: "Kids, Outfits",
-    price: 399,
-    originalPrice: 499,
-    discount: "20% Off",
-    soldOut: true,
-    image: "https://images.unsplash.com/photo-1622290291468-a28f7a7dc6a8?auto=format&fit=crop&w=600&q=80"
-  },
-  {
-    id: 3,
-    title: "Rompers for Babies Upto 23 months",
-    category: "Kids, Outfits",
-    price: 199,
-    originalPrice: 299,
-    discount: "33% Off",
-    soldOut: false,
-    image: "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?auto=format&fit=crop&w=600&q=80"
-  },
-  {
-    id: 4,
-    title: "Girls Casual Short Co-Ord Sets (6-36 Months)",
-    category: "Kids, Outfits",
-    price: 349,
-    originalPrice: 399,
-    discount: "13% Off",
-    soldOut: false,
-    image: "https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?auto=format&fit=crop&w=600&q=80"
-  },
-  {
-    id: 5,
-    title: "Girls Pant Top Co-Ord Sets (Upto 3 Years)",
-    category: "Kids, Outfits",
-    price: 349,
-    originalPrice: 399,
-    discount: "13% Off",
-    soldOut: false,
-    image: "https://images.unsplash.com/photo-1514090458221-65bb69cf63e6?auto=format&fit=crop&w=600&q=80"
-  },
-  {
-    id: 6,
-    title: "Flamingo Premium Girl Long Polo Frock",
-    category: "Kids, Outfits",
-    price: 399,
-    originalPrice: 499,
-    discount: "20% Off",
-    soldOut: true,
-    image: "https://images.unsplash.com/photo-1596870230751-ebdfce98ec42?auto=format&fit=crop&w=600&q=80"
-  },
-  {
-    id: 7,
-    title: "Baby Floral Summer Party Dress",
-    category: "Kids, Outfits",
-    price: 299,
-    originalPrice: 499,
-    discount: "40% Off",
-    soldOut: false,
-    image: "https://images.unsplash.com/photo-1519457431-44ccd64a579b?auto=format&fit=crop&w=600&q=80"
-  },
-  {
-    id: 8,
-    title: "Cute Printed Cotton Jumpsuit Set",
-    category: "Kids, Outfits",
-    price: 359,
-    originalPrice: 499,
-    discount: "28% Off",
-    soldOut: false,
-    image: "https://images.unsplash.com/photo-1543332164-6e82f355badc?auto=format&fit=crop&w=600&q=80"
-  }
-];
-
 export default function OutfitsForKids() {
-  const [items, setItems] = useState<any[]>(defaultKidsOutfits);
+  const router = useRouter();
+  const [items, setItems] = useState<any[]>([]);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(true);
   const touchStartX = useRef<number | null>(null);
@@ -100,6 +18,11 @@ export default function OutfitsForKids() {
   const { addToCart } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
 
+  const handleBuyNow = (product: any) => {
+    addToCart(product as unknown as Product);
+    router.push('/cart');
+  };
+
   // Load live products from WordPress
   useEffect(() => {
     async function load() {
@@ -107,23 +30,13 @@ export default function OutfitsForKids() {
         const res = await fetch('/api/products');
         if (res.ok) {
           const data = await res.json();
-          if (data?.products && data.products.length >= 2) {
+          if (data?.products && data.products.length > 0) {
             const outfitProducts = data.products.filter((p: any) => 
               (p.category?.toLowerCase().includes('outfit') || p.category?.toLowerCase().includes('dress') || p.category?.toLowerCase().includes('romper')) &&
               p.category?.toLowerCase().includes('kid')
             );
-            if (outfitProducts.length >= 2) {
-              const list = outfitProducts.slice(0, 8);
-              setItems(list.map((p: any, idx: number) => ({
-                id: p.id,
-                title: p.title,
-                category: p.category || 'Kids Outfits',
-                price: p.price,
-                originalPrice: p.originalPrice || p.price,
-                discount: p.discount || '',
-                soldOut: !!p.soldOut,
-                image: (p.image && !p.image.includes('placeholder')) ? p.image : defaultKidsOutfits[idx % defaultKidsOutfits.length].image
-              })));
+            if (outfitProducts.length > 0) {
+              setItems(outfitProducts);
             }
           }
         }
@@ -232,6 +145,8 @@ export default function OutfitsForKids() {
     }
   };
 
+  if (items.length === 0) return null;
+
   return (
     <section className="container mx-auto px-4 sm:px-6 md:px-8 py-8 md:py-12">
       {/* Header */}
@@ -273,7 +188,7 @@ export default function OutfitsForKids() {
             >
               {/* Image Box */}
               <div className="relative aspect-square w-full bg-gray-50 rounded-2xl overflow-hidden shadow-2xs">
-                <Link href="/shop" className="block w-full h-full">
+                <Link href={`/product/${product.id}`} className="block w-full h-full">
                   <img 
                     src={product.image} 
                     alt={product.title} 
@@ -303,7 +218,7 @@ export default function OutfitsForKids() {
 
               {/* Details */}
               <div className="flex flex-col mt-3">
-                <Link href="/shop" className="hover:text-yellow-600 transition-colors">
+                <Link href={`/product/${product.id}`} className="hover:text-yellow-600 transition-colors">
                   <h3 className="font-bold text-sm text-gray-900 line-clamp-1 leading-snug">
                     {product.title}
                   </h3>
@@ -320,8 +235,8 @@ export default function OutfitsForKids() {
                   )}
                 </div>
 
-                {/* Action Button: Add to Cart / Sold Out */}
-                <div className="mt-2.5">
+                {/* Action Buttons: Add to Cart & Buy Now */}
+                <div className="mt-2.5 flex items-center gap-1.5 flex-wrap">
                   {product.soldOut ? (
                     <button 
                       disabled
@@ -330,13 +245,22 @@ export default function OutfitsForKids() {
                       Sold Out
                     </button>
                   ) : (
-                    <button 
-                      onClick={() => addToCart(product as unknown as Product)}
-                      className="bg-[#1e2d3d] hover:bg-[#15202b] text-white text-xs font-semibold px-4 py-1.5 rounded-lg transition-colors cursor-pointer"
-                      title="Add to Cart"
-                    >
-                      Add to Cart
-                    </button>
+                    <>
+                      <button 
+                        onClick={() => addToCart(product as unknown as Product)}
+                        className="bg-[#1e2d3d] hover:bg-[#15202b] text-white text-xs font-semibold px-2.5 sm:px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
+                        title="Add to Cart"
+                      >
+                        Add to Cart
+                      </button>
+                      <button 
+                        onClick={() => handleBuyNow(product)}
+                        className="bg-yellow-400 hover:bg-yellow-500 text-black text-xs font-bold px-2.5 sm:px-3 py-1.5 rounded-lg transition-colors cursor-pointer shadow-2xs"
+                        title="Buy Now"
+                      >
+                        Buy Now
+                      </button>
+                    </>
                   )}
                 </div>
               </div>
@@ -368,7 +292,7 @@ export default function OutfitsForKids() {
                 >
                   {/* Image Box */}
                   <div className="relative aspect-square w-full bg-gray-50 rounded-lg overflow-hidden mb-2">
-                    <Link href="/shop" className="block w-full h-full">
+                    <Link href={`/product/${product.id}`} className="block w-full h-full">
                       <img 
                         src={product.image} 
                         alt={product.title} 
@@ -397,7 +321,7 @@ export default function OutfitsForKids() {
                   
                   {/* Details */}
                   <div className="flex flex-col flex-1">
-                    <Link href="/shop">
+                    <Link href={`/product/${product.id}`}>
                       <h3 className="font-bold text-xs text-gray-900 line-clamp-1 leading-snug">
                         {product.title}
                       </h3>
@@ -414,22 +338,30 @@ export default function OutfitsForKids() {
                       )}
                     </div>
                     
-                    {/* Action Button: Add to Cart / Sold Out */}
-                    <div className="mt-2.5 mt-auto">
+                    {/* Action Buttons: Add to Cart & Buy Now */}
+                    <div className="mt-2.5 mt-auto flex flex-col gap-1.5">
                       {product.soldOut ? (
                         <button 
                           disabled
-                          className="w-full bg-[#1e2d3d] text-white py-1.5 px-2 rounded-lg text-xs font-semibold opacity-85 cursor-not-allowed"
+                          className="w-full bg-[#1e2d3d] text-white py-1.5 px-2 rounded-lg text-xs font-semibold opacity-85 cursor-not-allowed text-center"
                         >
                           Sold Out
                         </button>
                       ) : (
-                        <button 
-                          onClick={() => addToCart(product as unknown as Product)}
-                          className="w-full bg-[#1e2d3d] hover:bg-[#15202b] text-white py-1.5 px-2 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
-                        >
-                          Add to Cart
-                        </button>
+                        <>
+                          <button 
+                            onClick={() => addToCart(product as unknown as Product)}
+                            className="w-full bg-[#1e2d3d] hover:bg-[#15202b] text-white py-1 px-2 rounded-lg text-[11px] font-semibold transition-colors cursor-pointer text-center"
+                          >
+                            Add to Cart
+                          </button>
+                          <button 
+                            onClick={() => handleBuyNow(product)}
+                            className="w-full bg-yellow-400 hover:bg-yellow-500 text-black py-1 px-2 rounded-lg text-[11px] font-bold transition-colors cursor-pointer text-center shadow-2xs"
+                          >
+                            Buy Now
+                          </button>
+                        </>
                       )}
                     </div>
                   </div>

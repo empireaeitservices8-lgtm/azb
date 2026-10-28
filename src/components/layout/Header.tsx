@@ -10,6 +10,7 @@ export default function Header() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { totalItems } = useCart();
+  const [isMounted, setIsMounted] = useState(false);
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [location, setLocation] = useState('Select location');
@@ -19,9 +20,31 @@ export default function Header() {
   // Search states
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Product[]>([]);
+  const [liveCatalog, setLiveCatalog] = useState<Product[]>([]);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const desktopSearchRef = useRef<HTMLDivElement>(null);
   const mobileSearchRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    async function loadLiveCatalog() {
+      try {
+        const res = await fetch('/api/products');
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data?.products)) {
+            setLiveCatalog(data.products);
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching live catalog for search:', err);
+      }
+    }
+    loadLiveCatalog();
+  }, []);
 
   useEffect(() => {
     const q = searchParams.get('q');
@@ -35,14 +58,14 @@ export default function Header() {
   // Update live search suggestions as user types
   useEffect(() => {
     if (searchQuery.trim().length > 0) {
-      const results = searchProducts(searchQuery);
+      const results = searchProducts(searchQuery, liveCatalog);
       setSearchResults(results.slice(0, 5));
       setIsSearchOpen(true);
     } else {
       setSearchResults([]);
       setIsSearchOpen(false);
     }
-  }, [searchQuery]);
+  }, [searchQuery, liveCatalog]);
 
   // Click outside to dismiss search dropdown
   useEffect(() => {
@@ -69,6 +92,12 @@ export default function Header() {
     } else {
       router.push('/shop');
     }
+  };
+
+  const navigateToProduct = (productId: number) => {
+    setIsSearchOpen(false);
+    setIsMobileMenuOpen(false);
+    router.push(`/product/${productId}`);
   };
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -201,7 +230,7 @@ export default function Header() {
                       {searchResults.map((item) => (
                         <div
                           key={item.id}
-                          onClick={() => executeSearch(item.title)}
+                          onClick={() => navigateToProduct(item.id)}
                           className="p-3 hover:bg-yellow-50/50 flex items-center gap-3 cursor-pointer transition-colors"
                         >
                           <div className="w-12 h-12 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 border border-gray-200">
@@ -278,8 +307,11 @@ export default function Header() {
             >
               <ShoppingCart size={20} className="sm:w-[18px] sm:h-[18px]" fill="currentColor" />
               <span className="hidden md:inline">Cart</span>
-              <span className="absolute -top-1 sm:-top-2 -right-0.5 sm:-right-1 bg-yellow-500 text-black font-bold text-[10px] rounded-full w-4 h-4 flex items-center justify-center shadow-sm">
-                {totalItems}
+              <span 
+                suppressHydrationWarning
+                className="absolute -top-1 sm:-top-2 -right-0.5 sm:-right-1 bg-yellow-500 text-black font-bold text-[10px] rounded-full w-4 h-4 flex items-center justify-center shadow-sm"
+              >
+                {isMounted ? totalItems : 0}
               </span>
             </Link>
           </div>
@@ -336,7 +368,7 @@ export default function Header() {
                     {searchResults.map((item) => (
                       <div
                         key={item.id}
-                        onClick={() => executeSearch(item.title)}
+                        onClick={() => navigateToProduct(item.id)}
                         className="p-2.5 hover:bg-yellow-50/50 flex items-center gap-3 cursor-pointer"
                       >
                         <div className="w-10 h-10 bg-gray-100 rounded-md overflow-hidden flex-shrink-0 border border-gray-200">
@@ -555,7 +587,12 @@ export default function Header() {
                     <ShoppingCart size={18} className="text-gray-500" />
                     <span>My Cart</span>
                   </div>
-                  <span className="bg-yellow-500 text-black font-bold text-xs rounded-full px-2 py-0.5">{totalItems}</span>
+                  <span 
+                    suppressHydrationWarning
+                    className="bg-yellow-500 text-black font-bold text-xs rounded-full px-2 py-0.5"
+                  >
+                    {isMounted ? totalItems : 0}
+                  </span>
                 </Link>
                 <button 
                   onClick={() => {

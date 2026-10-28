@@ -77,9 +77,9 @@ export default function Footer() {
             <ul className="flex flex-col gap-2.5 sm:gap-4 text-white/80 text-xs sm:text-sm">
               <li><Link href="/outfits" className="hover:text-yellow-400 transition-colors">Outfits</Link></li>
               <li><Link href="/kids" className="hover:text-yellow-400 transition-colors">Kids Zone</Link></li>
-              <li><Link href="/category/personalized-gifts" className="hover:text-yellow-400 transition-colors">Personalized Gifts</Link></li>
-              <li><Link href="/category/psc-books" className="hover:text-yellow-400 transition-colors">PSC Books</Link></li>
-              <li><Link href="/category/electronics" className="hover:text-yellow-400 transition-colors">Electronics</Link></li>
+              <li><Link href="/shop?category=Personalized+Gifts" className="hover:text-yellow-400 transition-colors">Personalized Gifts</Link></li>
+              <li><Link href="/shop?category=PSC+Books" className="hover:text-yellow-400 transition-colors">PSC Books</Link></li>
+              <li><Link href="/shop?category=Electronics" className="hover:text-yellow-400 transition-colors">Electronics</Link></li>
             </ul>
           </div>
 

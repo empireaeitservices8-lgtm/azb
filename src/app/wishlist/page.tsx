@@ -36,7 +36,9 @@ export default function WishlistPage() {
         {wishlist.map((item) => (
           <div key={item.id} className='bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col group'>
             <div className='relative aspect-[4/5] bg-gray-100 overflow-hidden'>
-              <img src={item.image} alt={item.title} className='w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 mix-blend-multiply' />
+              <Link href={`/product/${item.id}`} className="block w-full h-full">
+                <img src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 mix-blend-multiply" />
+              </Link>
               <button 
                 onClick={() => removeFromWishlist(item.id)}
                 className='absolute top-2 right-2 bg-white/90 backdrop-blur-xs p-1.5 rounded-full text-red-500 hover:text-red-700 transition-colors shadow-sm'
@@ -48,7 +50,9 @@ export default function WishlistPage() {
             
             <div className='p-3 flex flex-col flex-1'>
               <p className='text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1 truncate'>{item.category}</p>
-              <h3 className='font-bold text-xs sm:text-sm text-gray-900 line-clamp-2 leading-snug mb-2 flex-1'>{item.title}</h3>
+              <Link href={`/product/${item.id}`} className="hover:text-yellow-600 transition-colors">
+                <h3 className='font-bold text-xs sm:text-sm text-gray-900 line-clamp-2 leading-snug mb-2 flex-1'>{item.title}</h3>
+              </Link>
               
               <div className='mt-auto pt-2 border-t border-gray-100'>
                 <div className='flex items-baseline gap-1.5 flex-wrap mb-3'>

@@ -1,97 +1,15 @@
 'use client';
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Heart, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { Product } from '@/data/products';
 
-// Default products matching the reference items exactly
-const defaultProducts = [
-  {
-    id: 1,
-    title: "Twistup Rolling Crayon",
-    category: "Kids",
-    price: 299,
-    originalPrice: 399,
-    discount: "25% Off",
-    soldOut: false,
-    image: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&w=600&q=80"
-  },
-  {
-    id: 2,
-    title: "Premium Colouring Painting Kit",
-    category: "Kids",
-    price: 1299,
-    originalPrice: 1500,
-    discount: "13% Off",
-    soldOut: false,
-    image: "https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=600&q=80"
-  },
-  {
-    id: 3,
-    title: "Math Computing Colour Sorter",
-    category: "Kids",
-    price: 499,
-    originalPrice: 699,
-    discount: "29% Off",
-    soldOut: false,
-    image: "https://images.unsplash.com/photo-1587654780291-39c9404d746b?auto=format&fit=crop&w=600&q=80"
-  },
-  {
-    id: 4,
-    title: "Alphabet and Number Foam with Magnets",
-    category: "Kids",
-    price: 242,
-    originalPrice: 299,
-    discount: "19% Off",
-    soldOut: false,
-    image: "https://images.unsplash.com/photo-1569683795645-b62e50fbf103?auto=format&fit=crop&w=600&q=80"
-  },
-  {
-    id: 5,
-    title: "Magic Box ( 110 Tricks, 52 Tricks, 25 Tricks )",
-    category: "Kids",
-    price: 629,
-    originalPrice: 699,
-    discount: "10% Off",
-    soldOut: true,
-    image: "https://images.unsplash.com/photo-1610890716171-6b1bb98ffd09?auto=format&fit=crop&w=600&q=80"
-  },
-  {
-    id: 6,
-    title: "Elephant Stack Attack Game",
-    category: "Kids",
-    price: 361,
-    originalPrice: 399,
-    discount: "10% Off",
-    soldOut: false,
-    image: "https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?auto=format&fit=crop&w=600&q=80"
-  },
-  {
-    id: 7,
-    title: "Basketball Hoop Set for Kids",
-    category: "Kids",
-    price: 849,
-    originalPrice: 1999,
-    discount: "58% Off",
-    soldOut: false,
-    image: "https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=600&q=80"
-  },
-  {
-    id: 8,
-    title: "Premium Silicone Pencil Pouch",
-    category: "Kids",
-    price: 242,
-    originalPrice: 399,
-    discount: "39% Off",
-    soldOut: false,
-    image: "https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?auto=format&fit=crop&w=600&q=80"
-  }
-];
-
 export default function TopPicks() {
-  const [items, setItems] = useState<any[]>(defaultProducts);
+  const router = useRouter();
+  const [items, setItems] = useState<any[]>([]);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(true);
   const touchStartX = useRef<number | null>(null);
@@ -100,36 +18,27 @@ export default function TopPicks() {
   const { addToCart } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
 
-  // Load live products from WordPress if available
+  const handleBuyNow = (product: any) => {
+    addToCart(product as unknown as Product);
+    router.push('/cart');
+  };
+
+  // Load live products from WordPress
   useEffect(() => {
     async function load() {
       try {
         const res = await fetch('/api/products');
         if (res.ok) {
           const data = await res.json();
-          if (data?.products && data.products.length >= 5) {
+          if (data?.products && data.products.length > 0) {
             const kidsProducts = data.products.filter((p: any) => 
-              (p.category?.toLowerCase().includes('kid') || 
-               p.category?.toLowerCase().includes('toy') ||
-               p.category?.toLowerCase().includes('stationery') ||
-               p.mainCategory === 'Kids') &&
-              !p.category?.toLowerCase().includes('shoe') &&
-              !p.category?.toLowerCase().includes('laundry') &&
-              !p.title?.toLowerCase().includes('shoe') &&
-              !p.title?.toLowerCase().includes('laundry')
+              p.category?.toLowerCase().includes('kid') || 
+              p.category?.toLowerCase().includes('toy') ||
+              p.category?.toLowerCase().includes('stationery') ||
+              p.mainCategory === 'Kids'
             );
-            if (kidsProducts.length >= 5) {
-              const list = kidsProducts.slice(0, 10);
-              setItems(list.map((p: any, idx: number) => ({
-                id: p.id,
-                title: p.title,
-                category: p.category || 'Kids',
-                price: p.price,
-                originalPrice: p.originalPrice || p.price,
-                discount: p.discount || '',
-                soldOut: !!p.soldOut,
-                image: (p.image && !p.image.includes('placeholder')) ? p.image : defaultProducts[idx % defaultProducts.length].image
-              })));
+            if (kidsProducts.length > 0) {
+              setItems(kidsProducts);
             }
           }
         }
@@ -238,6 +147,8 @@ export default function TopPicks() {
     }
   };
 
+  if (items.length === 0) return null;
+
   return (
     <section className="container mx-auto px-4 sm:px-6 md:px-8 py-8 md:py-12">
       {/* Header */}
@@ -279,7 +190,7 @@ export default function TopPicks() {
             >
               {/* Image Box */}
               <div className="relative aspect-square w-full bg-gray-50 rounded-2xl overflow-hidden shadow-2xs">
-                <Link href="/shop" className="block w-full h-full">
+                <Link href={`/product/${product.id}`} className="block w-full h-full">
                   <img 
                     src={product.image} 
                     alt={product.title} 
@@ -309,7 +220,7 @@ export default function TopPicks() {
 
               {/* Details */}
               <div className="flex flex-col mt-3">
-                <Link href="/shop" className="hover:text-yellow-600 transition-colors">
+                <Link href={`/product/${product.id}`} className="hover:text-yellow-600 transition-colors">
                   <h3 className="font-bold text-sm text-gray-900 line-clamp-1 leading-snug">
                     {product.title}
                   </h3>
@@ -326,8 +237,8 @@ export default function TopPicks() {
                   )}
                 </div>
 
-                {/* Action Button: Add to Cart / Sold Out */}
-                <div className="mt-2.5">
+                {/* Action Buttons: Add to Cart & Buy Now */}
+                <div className="mt-2.5 flex items-center gap-1.5 flex-wrap">
                   {product.soldOut ? (
                     <button 
                       disabled
@@ -336,13 +247,22 @@ export default function TopPicks() {
                       Sold Out
                     </button>
                   ) : (
-                    <button 
-                      onClick={() => addToCart(product as unknown as Product)}
-                      className="bg-[#1e2d3d] hover:bg-[#15202b] text-white text-xs font-semibold px-4 py-1.5 rounded-lg transition-colors cursor-pointer"
-                      title="Add to Cart"
-                    >
-                      Add to Cart
-                    </button>
+                    <>
+                      <button 
+                        onClick={() => addToCart(product as unknown as Product)}
+                        className="bg-[#1e2d3d] hover:bg-[#15202b] text-white text-xs font-semibold px-2.5 sm:px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
+                        title="Add to Cart"
+                      >
+                        Add to Cart
+                      </button>
+                      <button 
+                        onClick={() => handleBuyNow(product)}
+                        className="bg-yellow-400 hover:bg-yellow-500 text-black text-xs font-bold px-2.5 sm:px-3 py-1.5 rounded-lg transition-colors cursor-pointer shadow-2xs"
+                        title="Buy Now"
+                      >
+                        Buy Now
+                      </button>
+                    </>
                   )}
                 </div>
               </div>
@@ -374,7 +294,7 @@ export default function TopPicks() {
                 >
                   {/* Image Box */}
                   <div className="relative aspect-square w-full bg-gray-50 rounded-lg overflow-hidden mb-2">
-                    <Link href="/shop" className="block w-full h-full">
+                    <Link href={`/product/${product.id}`} className="block w-full h-full">
                       <img 
                         src={product.image} 
                         alt={product.title} 
@@ -403,7 +323,7 @@ export default function TopPicks() {
                   
                   {/* Details */}
                   <div className="flex flex-col flex-1">
-                    <Link href="/shop">
+                    <Link href={`/product/${product.id}`}>
                       <h3 className="font-bold text-xs text-gray-900 line-clamp-1 leading-snug">
                         {product.title}
                       </h3>
@@ -420,22 +340,30 @@ export default function TopPicks() {
                       )}
                     </div>
                     
-                    {/* Action Button: Add to Cart / Sold Out */}
-                    <div className="mt-2.5 mt-auto">
+                    {/* Action Buttons: Add to Cart & Buy Now */}
+                    <div className="mt-2.5 mt-auto flex flex-col gap-1.5">
                       {product.soldOut ? (
                         <button 
                           disabled
-                          className="w-full bg-[#1e2d3d] text-white py-1.5 px-2 rounded-lg text-xs font-semibold opacity-85 cursor-not-allowed"
+                          className="w-full bg-[#1e2d3d] text-white py-1.5 px-2 rounded-lg text-xs font-semibold opacity-85 cursor-not-allowed text-center"
                         >
                           Sold Out
                         </button>
                       ) : (
-                        <button 
-                          onClick={() => addToCart(product as unknown as Product)}
-                          className="w-full bg-[#1e2d3d] hover:bg-[#15202b] text-white py-1.5 px-2 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
-                        >
-                          Add to Cart
-                        </button>
+                        <>
+                          <button 
+                            onClick={() => addToCart(product as unknown as Product)}
+                            className="w-full bg-[#1e2d3d] hover:bg-[#15202b] text-white py-1 px-2 rounded-lg text-[11px] font-semibold transition-colors cursor-pointer text-center"
+                          >
+                            Add to Cart
+                          </button>
+                          <button 
+                            onClick={() => handleBuyNow(product)}
+                            className="w-full bg-yellow-400 hover:bg-yellow-500 text-black py-1 px-2 rounded-lg text-[11px] font-bold transition-colors cursor-pointer text-center shadow-2xs"
+                          >
+                            Buy Now
+                          </button>
+                        </>
                       )}
                     </div>
                   </div>

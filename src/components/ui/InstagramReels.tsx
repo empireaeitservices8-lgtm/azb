@@ -1,5 +1,6 @@
 'use client';
 import React, { useRef, useState } from 'react';
+import Link from 'next/link';
 import { ChevronLeft, ChevronRight, Volume2, VolumeX, ExternalLink } from 'lucide-react';
 
 interface ReelItem {
@@ -12,49 +13,56 @@ interface ReelItem {
   videoSrc: string;
   instagramUrl: string;
   poster?: string;
+  productId?: number;
 }
 
 const reelVideos: ReelItem[] = [
   {
     id: 101,
-    title: "OMR Answer Sheet Book",
-    category: "Books & Stationery",
-    price: 199,
-    originalPrice: 299,
-    discount: "33% Off",
-    videoSrc: "/videos/reel1.mp4.mp4",
-    instagramUrl: "https://www.instagram.com/"
-  },
-  {
-    id: 103,
-    title: "7 in One Laundry Pod",
-    category: "Home Essentials",
-    price: 200,
-    originalPrice: 399,
-    discount: "50% Off",
-    videoSrc: "/videos/reel3.mp4.mp4",
-    poster: "/images/laundry_pod_banner.jpg",
+    productId: 23,
+    title: "Neon 4-in-1 Car Charger Advertisement",
+    category: "Electronics",
+    price: 999,
+    originalPrice: 1050,
+    discount: "5% Off",
+    videoSrc: "/videos/reel1.mp4",
+    poster: "https://lightcyan-gorilla-655722.hostingersite.com/wp-content/uploads/2026/10/Neon-4-in-1-Car-Charger-Advertisement.png",
     instagramUrl: "https://www.instagram.com/"
   },
   {
     id: 102,
-    title: "Shoe Shine Wipes",
-    category: "Daily Essentials",
+    productId: 14,
+    title: "Stacked Black Shoe Shine Wipes",
+    category: "Shoe Care",
     price: 180,
     originalPrice: 249,
     discount: "28% Off",
-    videoSrc: "/videos/reel2.mp4.mp4",
+    videoSrc: "/videos/reel2.mp4",
     poster: "/images/shoe_shine_wipes_banner.jpg",
     instagramUrl: "https://www.instagram.com/"
   },
   {
+    id: 103,
+    productId: 12,
+    title: "7 in 1 Laundry Pod (20 Pods Cleaning Power)",
+    category: "Home Essentials, Laundry",
+    price: 200,
+    originalPrice: 399,
+    discount: "50% Off",
+    videoSrc: "/videos/reel3.mp4",
+    poster: "/images/laundry_pod_banner.jpg",
+    instagramUrl: "https://www.instagram.com/"
+  },
+  {
     id: 104,
-    title: "Customized Memory Book",
-    category: "Personalized Gifts",
-    price: 499,
-    originalPrice: 899,
-    discount: "44% Off",
-    videoSrc: "/videos/reel4.mp4.mp4",
+    productId: 21,
+    title: "Drone E88 Dual-Camera Store Showcase",
+    category: "Electronics",
+    price: 1399,
+    originalPrice: 1500,
+    discount: "7% Off",
+    videoSrc: "/videos/reel4.mp4",
+    poster: "https://lightcyan-gorilla-655722.hostingersite.com/wp-content/uploads/2026/10/Drone-E88-Dual-Camera-Store-Showcase.png",
     instagramUrl: "https://www.instagram.com/"
   }
 ];
@@ -186,9 +194,11 @@ export default function InstagramReels() {
             {/* Product Information Directly Under Each Video */}
             <div className="p-3 sm:p-4 flex flex-col flex-1 bg-white">
               {/* Product Title */}
-              <h3 className="font-bold text-xs sm:text-sm text-gray-900 line-clamp-2 leading-snug min-h-[32px] sm:min-h-[40px]">
-                {reel.title}
-              </h3>
+              <Link href={`/product/${reel.productId || reel.id}`} className="hover:text-yellow-600 transition-colors">
+                <h3 className="font-bold text-xs sm:text-sm text-gray-900 line-clamp-2 leading-snug min-h-[32px] sm:min-h-[40px]">
+                  {reel.title}
+                </h3>
+              </Link>
               
               {/* Category */}
               <p className="text-[11px] sm:text-xs text-gray-500 mt-0.5">{reel.category}</p>
@@ -198,6 +208,16 @@ export default function InstagramReels() {
                 <span className="text-base sm:text-lg font-extrabold text-gray-900">₹{reel.price}</span>
                 <span className="text-xs text-gray-400 line-through">₹{reel.originalPrice}</span>
                 <span className="text-xs font-bold text-red-500">({reel.discount})</span>
+              </div>
+
+              {/* Buy Now CTA */}
+              <div className="mt-3 pt-2.5 border-t border-gray-100">
+                <Link
+                  href={`/product/${reel.productId || reel.id}`}
+                  className="w-full block bg-yellow-400 hover:bg-yellow-500 text-black text-center py-1.5 px-3 rounded-lg text-xs font-bold transition-colors cursor-pointer shadow-2xs"
+                >
+                  Buy Now
+                </Link>
               </div>
             </div>
           </div>

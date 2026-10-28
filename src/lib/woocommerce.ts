@@ -46,6 +46,25 @@ export async function fetchWCProducts(params: Record<string, string | number> = 
   }
 }
 
+export async function fetchWCProductById(id: number | string): Promise<WCProduct | null> {
+  try {
+    const searchParams = new URLSearchParams({
+      consumer_key: CONSUMER_KEY,
+      consumer_secret: CONSUMER_SECRET,
+    });
+
+    const res = await fetch(`${STORE_URL}/wp-json/wc/v3/products/${id}?${searchParams.toString()}`, {
+      cache: 'no-store'
+    });
+
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (err) {
+    console.error(`Failed to fetch product ${id} from WooCommerce:`, err);
+    return null;
+  }
+}
+
 export async function fetchWCCategories() {
   try {
     const searchParams = new URLSearchParams({
@@ -87,5 +106,28 @@ export async function fetchWCMedia(): Promise<WCMediaItem[]> {
   } catch (err) {
     console.error('Failed to fetch media from WordPress:', err);
     return [];
+  }
+}
+
+export async function createWCOrder(orderData: any) {
+  try {
+    const searchParams = new URLSearchParams({
+      consumer_key: CONSUMER_KEY,
+      consumer_secret: CONSUMER_SECRET,
+    });
+    const res = await fetch(`${STORE_URL}/wp-json/wc/v3/orders?${searchParams.toString()}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(orderData)
+    });
+    if (!res.ok) {
+      const errText = await res.text();
+      console.error('Failed to create WC order:', errText);
+      return null;
+    }
+    return await res.json();
+  } catch (err) {
+    console.error('Error creating WooCommerce order:', err);
+    return null;
   }
 }

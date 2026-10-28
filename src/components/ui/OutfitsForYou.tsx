@@ -1,97 +1,15 @@
 'use client';
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Heart, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { Product } from '@/data/products';
 
-// 8 unique women dress products with authentic images
-const defaultWomenOutfits = [
-  {
-    id: 1,
-    title: "MINUKKI Designer Kurti Set",
-    category: "Outfits",
-    price: 549,
-    originalPrice: 999,
-    discount: "45% Off",
-    soldOut: false,
-    image: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=600&q=80"
-  },
-  {
-    id: 2,
-    title: "NEELAMBARI Elegant Saree & Suit",
-    category: "Outfits",
-    price: 849,
-    originalPrice: 1699,
-    discount: "50% Off",
-    soldOut: false,
-    image: "https://images.unsplash.com/photo-1617627143750-d86bc21e42bb?auto=format&fit=crop&w=600&q=80"
-  },
-  {
-    id: 3,
-    title: "Pink Rosa Floral Summer Dress",
-    category: "Outfits",
-    price: 799,
-    originalPrice: 1399,
-    discount: "43% Off",
-    soldOut: false,
-    image: "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?auto=format&fit=crop&w=600&q=80"
-  },
-  {
-    id: 4,
-    title: "BLACK PAKISTANI COLLECTION (2 PIECE)",
-    category: "Outfits",
-    price: 599,
-    originalPrice: 999,
-    discount: "40% Off",
-    soldOut: true,
-    image: "https://images.unsplash.com/photo-1566174053879-31528523f8ae?auto=format&fit=crop&w=600&q=80"
-  },
-  {
-    id: 5,
-    title: "Mehak Embroidered (3 Piece Set)",
-    category: "Outfits",
-    price: 799,
-    originalPrice: 1499,
-    discount: "47% Off",
-    soldOut: false,
-    image: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=600&q=80"
-  },
-  {
-    id: 6,
-    title: "Pink Blossom Festive (3 Piece Set)",
-    category: "Outfits",
-    price: 899,
-    originalPrice: 1599,
-    discount: "44% Off",
-    soldOut: false,
-    image: "https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?auto=format&fit=crop&w=600&q=80"
-  },
-  {
-    id: 7,
-    title: "Royal Crimson Anarkali Gown",
-    category: "Outfits",
-    price: 999,
-    originalPrice: 1899,
-    discount: "47% Off",
-    soldOut: false,
-    image: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&w=600&q=80"
-  },
-  {
-    id: 8,
-    title: "Emerald Silk Embroidered Kurta Set",
-    category: "Outfits",
-    price: 899,
-    originalPrice: 1699,
-    discount: "47% Off",
-    soldOut: false,
-    image: "https://images.unsplash.com/photo-1609357605129-26f69add5d6e?auto=format&fit=crop&w=600&q=80"
-  }
-];
-
 export default function OutfitsForYou() {
-  const [items, setItems] = useState<any[]>(defaultWomenOutfits);
+  const router = useRouter();
+  const [items, setItems] = useState<any[]>([]);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(true);
   const touchStartX = useRef<number | null>(null);
@@ -100,6 +18,11 @@ export default function OutfitsForYou() {
   const { addToCart } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
 
+  const handleBuyNow = (product: any) => {
+    addToCart(product as unknown as Product);
+    router.push('/cart');
+  };
+
   // Load live products from WordPress
   useEffect(() => {
     async function load() {
@@ -107,29 +30,17 @@ export default function OutfitsForYou() {
         const res = await fetch('/api/products');
         if (res.ok) {
           const data = await res.json();
-          if (data?.products && data.products.length >= 2) {
+          if (data?.products && data.products.length > 0) {
             const womenOutfits = data.products.filter((p: any) => 
               (p.category?.toLowerCase().includes('outfit') || 
                p.category?.toLowerCase().includes('kurti') || 
                p.category?.toLowerCase().includes('saree') || 
                p.category?.toLowerCase().includes('women') || 
                p.category?.toLowerCase().includes('ethnic')) &&
-              !p.category?.toLowerCase().includes('kid') &&
-              !p.category?.toLowerCase().includes('shoe') &&
-              !p.category?.toLowerCase().includes('laundry')
+              !p.category?.toLowerCase().includes('kid')
             );
-            if (womenOutfits.length >= 2) {
-              const list = womenOutfits.slice(0, 8);
-              setItems(list.map((p: any, idx: number) => ({
-                id: p.id,
-                title: p.title,
-                category: p.category || 'Outfits',
-                price: p.price,
-                originalPrice: p.originalPrice || p.price,
-                discount: p.discount || '',
-                soldOut: !!p.soldOut,
-                image: (p.image && !p.image.includes('placeholder')) ? p.image : defaultWomenOutfits[idx % defaultWomenOutfits.length].image
-              })));
+            if (womenOutfits.length > 0) {
+              setItems(womenOutfits);
             }
           }
         }
@@ -238,6 +149,8 @@ export default function OutfitsForYou() {
     }
   };
 
+  if (items.length === 0) return null;
+
   return (
     <section className="container mx-auto px-4 sm:px-6 md:px-8 py-8 md:py-12">
       {/* Header */}
@@ -279,7 +192,7 @@ export default function OutfitsForYou() {
             >
               {/* Image Box */}
               <div className="relative aspect-square w-full bg-gray-50 rounded-2xl overflow-hidden shadow-2xs">
-                <Link href="/shop" className="block w-full h-full">
+                <Link href={`/product/${product.id}`} className="block w-full h-full">
                   <img 
                     src={product.image} 
                     alt={product.title} 
@@ -309,7 +222,7 @@ export default function OutfitsForYou() {
 
               {/* Details */}
               <div className="flex flex-col mt-3">
-                <Link href="/shop" className="hover:text-yellow-600 transition-colors">
+                <Link href={`/product/${product.id}`} className="hover:text-yellow-600 transition-colors">
                   <h3 className="font-bold text-sm text-gray-900 line-clamp-1 leading-snug">
                     {product.title}
                   </h3>
@@ -326,8 +239,8 @@ export default function OutfitsForYou() {
                   )}
                 </div>
 
-                {/* Action Button: Add to Cart / Sold Out */}
-                <div className="mt-2.5">
+                {/* Action Buttons: Add to Cart & Buy Now */}
+                <div className="mt-2.5 flex items-center gap-1.5 flex-wrap">
                   {product.soldOut ? (
                     <button 
                       disabled
@@ -336,13 +249,22 @@ export default function OutfitsForYou() {
                       Sold Out
                     </button>
                   ) : (
-                    <button 
-                      onClick={() => addToCart(product as unknown as Product)}
-                      className="bg-[#1e2d3d] hover:bg-[#15202b] text-white text-xs font-semibold px-4 py-1.5 rounded-lg transition-colors cursor-pointer"
-                      title="Add to Cart"
-                    >
-                      Add to Cart
-                    </button>
+                    <>
+                      <button 
+                        onClick={() => addToCart(product as unknown as Product)}
+                        className="bg-[#1e2d3d] hover:bg-[#15202b] text-white text-xs font-semibold px-2.5 sm:px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
+                        title="Add to Cart"
+                      >
+                        Add to Cart
+                      </button>
+                      <button 
+                        onClick={() => handleBuyNow(product)}
+                        className="bg-yellow-400 hover:bg-yellow-500 text-black text-xs font-bold px-2.5 sm:px-3 py-1.5 rounded-lg transition-colors cursor-pointer shadow-2xs"
+                        title="Buy Now"
+                      >
+                        Buy Now
+                      </button>
+                    </>
                   )}
                 </div>
               </div>
@@ -374,7 +296,7 @@ export default function OutfitsForYou() {
                 >
                   {/* Image Box */}
                   <div className="relative aspect-square w-full bg-gray-50 rounded-lg overflow-hidden mb-2">
-                    <Link href="/shop" className="block w-full h-full">
+                    <Link href={`/product/${product.id}`} className="block w-full h-full">
                       <img 
                         src={product.image} 
                         alt={product.title} 
@@ -403,7 +325,7 @@ export default function OutfitsForYou() {
                   
                   {/* Details */}
                   <div className="flex flex-col flex-1">
-                    <Link href="/shop">
+                    <Link href={`/product/${product.id}`}>
                       <h3 className="font-bold text-xs text-gray-900 line-clamp-1 leading-snug">
                         {product.title}
                       </h3>
@@ -420,22 +342,30 @@ export default function OutfitsForYou() {
                       )}
                     </div>
                     
-                    {/* Action Button: Add to Cart / Sold Out */}
-                    <div className="mt-2.5 mt-auto">
+                    {/* Action Buttons: Add to Cart & Buy Now */}
+                    <div className="mt-2.5 mt-auto flex flex-col gap-1.5">
                       {product.soldOut ? (
                         <button 
                           disabled
-                          className="w-full bg-[#1e2d3d] text-white py-1.5 px-2 rounded-lg text-xs font-semibold opacity-85 cursor-not-allowed"
+                          className="w-full bg-[#1e2d3d] text-white py-1.5 px-2 rounded-lg text-xs font-semibold opacity-85 cursor-not-allowed text-center"
                         >
                           Sold Out
                         </button>
                       ) : (
-                        <button 
-                          onClick={() => addToCart(product as unknown as Product)}
-                          className="w-full bg-[#1e2d3d] hover:bg-[#15202b] text-white py-1.5 px-2 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
-                        >
-                          Add to Cart
-                        </button>
+                        <>
+                          <button 
+                            onClick={() => addToCart(product as unknown as Product)}
+                            className="w-full bg-[#1e2d3d] hover:bg-[#15202b] text-white py-1 px-2 rounded-lg text-[11px] font-semibold transition-colors cursor-pointer text-center"
+                          >
+                            Add to Cart
+                          </button>
+                          <button 
+                            onClick={() => handleBuyNow(product)}
+                            className="w-full bg-yellow-400 hover:bg-yellow-500 text-black py-1 px-2 rounded-lg text-[11px] font-bold transition-colors cursor-pointer text-center shadow-2xs"
+                          >
+                            Buy Now
+                          </button>
+                        </>
                       )}
                     </div>
                   </div>

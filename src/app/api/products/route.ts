@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { fetchWCProducts, fetchWCMedia, WCProduct, WCMediaItem } from '@/lib/woocommerce';
-import { allProducts, Product } from '@/data/products';
+import { Product } from '@/data/products';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -113,33 +113,24 @@ export async function GET() {
     
     if (wcProducts && wcProducts.length > 0) {
       const mapped = wcProducts.map(wc => mapWCToProduct(wc, wcMedia));
-      
-      // Combine live WooCommerce products first, then fill with unique catalog products
-      const seenTitles = new Set(mapped.map(p => p.title.toLowerCase().trim()));
-      const seenIds = new Set(mapped.map(p => p.id));
-      const remainingLocal = allProducts
-        .filter(p => !seenTitles.has(p.title.toLowerCase().trim()))
-        .map(p => (seenIds.has(p.id) ? { ...p, id: p.id + 10000 } : p));
-
       return NextResponse.json({
         source: 'woocommerce',
         wcCount: mapped.length,
-        products: [...mapped, ...remainingLocal]
+        products: mapped
       });
     }
 
-    // Fallback if WooCommerce store has no products yet
     return NextResponse.json({
-      source: 'local',
+      source: 'woocommerce',
       wcCount: 0,
-      products: allProducts
+      products: []
     });
   } catch (err) {
     console.error('Error in /api/products route:', err);
     return NextResponse.json({
-      source: 'local',
+      source: 'error',
       wcCount: 0,
-      products: allProducts
+      products: []
     });
   }
 }

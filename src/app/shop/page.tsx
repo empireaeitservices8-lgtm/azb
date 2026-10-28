@@ -1,26 +1,32 @@
 'use client';
 
 import React, { useState, useEffect, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Search, Heart, SlidersHorizontal, ArrowUpDown, X, Tag } from 'lucide-react';
-import { allProducts, Product } from '@/data/products';
+import { Product } from '@/data/products';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
 
 function ShopContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const initialQuery = searchParams.get('q') || '';
   const initialCategory = searchParams.get('category') || 'All';
   const { addToCart } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
 
+  const handleBuyNow = (product: Product) => {
+    addToCart(product);
+    router.push('/cart');
+  };
+
   const [query, setQuery] = useState(initialQuery);
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const [sortBy, setSortBy] = useState<'featured' | 'price-low' | 'price-high'>('featured');
-  const [baseProducts, setBaseProducts] = useState<Product[]>(allProducts);
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>(allProducts);
-  const [loading, setLoading] = useState(false);
+  const [baseProducts, setBaseProducts] = useState<Product[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // Fetch live products from WooCommerce API
   useEffect(() => {
@@ -30,7 +36,7 @@ function ShopContent() {
         const res = await fetch('/api/products');
         if (res.ok) {
           const data = await res.json();
-          if (data?.products && data.products.length > 0) {
+          if (data?.products) {
             setBaseProducts(data.products);
           }
         }
@@ -214,11 +220,13 @@ function ShopContent() {
               >
                 {/* Image */}
                 <div className="relative aspect-[4/5] bg-gray-100 overflow-hidden">
-                  <img 
-                    src={product.image} 
-                    alt={product.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 mix-blend-multiply"
-                  />
+                  <Link href={`/product/${product.id}`} className="block w-full h-full">
+                    <img 
+                      src={product.image} 
+                      alt={product.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 mix-blend-multiply"
+                    />
+                  </Link>
                   <button 
                     onClick={() => isInWishlist(product.id) ? removeFromWishlist(product.id) : addToWishlist(product)}
                     className={`absolute top-2 right-2 backdrop-blur-xs p-1.5 rounded-full transition-colors shadow-xs ${
@@ -240,9 +248,11 @@ function ShopContent() {
                   <p className="text-[11px] font-semibold text-yellow-700 uppercase tracking-wider mb-1 truncate">
                     {product.category}
                   </p>
-                  <h3 className="font-bold text-xs sm:text-sm text-gray-900 line-clamp-2 leading-snug mb-2 flex-1">
-                    {product.title}
-                  </h3>
+                  <Link href={`/product/${product.id}`} className="hover:text-yellow-600 transition-colors">
+                    <h3 className="font-bold text-xs sm:text-sm text-gray-900 line-clamp-2 leading-snug mb-2 flex-1">
+                      {product.title}
+                    </h3>
+                  </Link>
 
                   <div className="mt-auto pt-2 border-t border-gray-100">
                     <div className="flex items-baseline gap-1.5 flex-wrap mb-2.5">
@@ -258,12 +268,20 @@ function ShopContent() {
                         Sold Out
                       </button>
                     ) : (
-                      <button 
-                        onClick={() => addToCart(product)}
-                        className="w-full bg-black text-white hover:bg-yellow-500 hover:text-black transition-colors py-1.5 rounded-lg text-xs font-bold cursor-pointer"
-                      >
-                        Add to Cart
-                      </button>
+                      <div className="flex items-center gap-1.5">
+                        <button 
+                          onClick={() => addToCart(product)}
+                          className="flex-1 bg-black text-white hover:bg-gray-800 transition-colors py-1.5 rounded-lg text-xs font-bold cursor-pointer"
+                        >
+                          Add to Cart
+                        </button>
+                        <button 
+                          onClick={() => handleBuyNow(product)}
+                          className="flex-1 bg-yellow-400 hover:bg-yellow-500 text-black transition-colors py-1.5 rounded-lg text-xs font-extrabold cursor-pointer shadow-2xs"
+                        >
+                          Buy Now
+                        </button>
+                      </div>
                     )}
                   </div>
                 </div>

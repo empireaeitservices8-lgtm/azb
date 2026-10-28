@@ -18,92 +18,9 @@ interface BestSellingProductItem {
   image: string;
 }
 
-const defaultBestSellingProducts: BestSellingProductItem[] = [
-  {
-    id: 27,
-    title: "Shoe Shine Wipes (80 Series Powerful Formula)",
-    category: "Shoe Care",
-    price: 180,
-    originalPrice: 249,
-    discount: "28% Off",
-    soldOut: false,
-    image: "/images/shoe_shine_wipes.jpg"
-  },
-  {
-    id: 28,
-    title: "7 in 1 Laundry Pod (20 Pods Cleaning Power)",
-    category: "Laundry",
-    price: 200,
-    originalPrice: 399,
-    discount: "50% Off",
-    soldOut: false,
-    image: "/images/laundry_pod.jpg"
-  },
-  {
-    id: 1,
-    title: "Weigh N Play | Math Balancing Toy",
-    category: "Kids, Educational Toys",
-    price: 629,
-    originalPrice: 699,
-    discount: "10% Off",
-    soldOut: false,
-    image: "https://images.unsplash.com/photo-1587654780291-39c9404d746b?auto=format&fit=crop&w=600&q=80"
-  },
-  {
-    id: 2,
-    title: "6 in One Linear Pen (Magic Pen)",
-    category: "Kids, Stationery",
-    price: 241,
-    originalPrice: 299,
-    discount: "19% Off",
-    soldOut: false,
-    image: "https://images.unsplash.com/photo-1585776245991-cf89dd7fc73a?auto=format&fit=crop&w=600&q=80"
-  },
-  {
-    id: 3,
-    title: "Mikado Spiel Wooden Sticks Game",
-    category: "Kids, Games",
-    price: 189,
-    originalPrice: 249,
-    discount: "24% Off",
-    soldOut: false,
-    image: "https://images.unsplash.com/photo-1610890716171-6b1bb98ffd09?auto=format&fit=crop&w=600&q=80"
-  },
-  {
-    id: 4,
-    title: "Vacation Combo (Fun & Play Water Books)",
-    category: "Kids, Books & Kits",
-    price: 2650,
-    originalPrice: 3999,
-    discount: "34% Off",
-    soldOut: false,
-    image: "https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=600&q=80"
-  },
-  {
-    id: 5,
-    title: "Elephant Stack Attack Game",
-    category: "Kids, Toys",
-    price: 361,
-    originalPrice: 399,
-    discount: "10% Off",
-    soldOut: false,
-    image: "https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?auto=format&fit=crop&w=600&q=80"
-  },
-  {
-    id: 6,
-    title: "Basketball Hoop Set for Kids",
-    category: "Kids, Sports",
-    price: 849,
-    originalPrice: 1999,
-    discount: "58% Off",
-    soldOut: false,
-    image: "https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=600&q=80"
-  }
-];
-
 export default function BestSellingProducts() {
   const router = useRouter();
-  const [items, setItems] = useState<BestSellingProductItem[]>(defaultBestSellingProducts);
+  const [items, setItems] = useState<BestSellingProductItem[]>([]);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(true);
   const touchStartX = useRef<number | null>(null);
@@ -136,21 +53,7 @@ export default function BestSellingProducts() {
               image: p.image
             }));
 
-            // Deduplicate products by both unique ID and title
-            const seenIds = new Set<number>();
-            const seenTitles = new Set<string>();
-            const uniqueList: BestSellingProductItem[] = [];
-
-            for (const item of [...liveItems, ...defaultBestSellingProducts]) {
-              const titleKey = item.title.toLowerCase().trim();
-              if (!seenIds.has(item.id) && !seenTitles.has(titleKey)) {
-                seenIds.add(item.id);
-                seenTitles.add(titleKey);
-                uniqueList.push(item);
-              }
-            }
-
-            setItems(uniqueList.slice(0, 10));
+            setItems(liveItems);
           }
         }
       } catch (e) {
@@ -258,6 +161,8 @@ export default function BestSellingProducts() {
     }
   };
 
+  if (items.length === 0) return null;
+
   return (
     <section className="container mx-auto px-4 sm:px-6 md:px-8 py-8 md:py-12">
       {/* Header */}
@@ -299,7 +204,7 @@ export default function BestSellingProducts() {
             >
               {/* Image Box */}
               <div className="relative aspect-square w-full bg-gray-50 rounded-2xl overflow-hidden shadow-2xs">
-                <Link href="/shop" className="block w-full h-full">
+                <Link href={`/product/${product.id}`} className="block w-full h-full">
                   <img 
                     src={product.image} 
                     alt={product.title} 
@@ -329,7 +234,7 @@ export default function BestSellingProducts() {
 
               {/* Details */}
               <div className="flex flex-col mt-3">
-                <Link href="/shop" className="hover:text-yellow-600 transition-colors">
+                <Link href={`/product/${product.id}`} className="hover:text-yellow-600 transition-colors">
                   <h3 className="font-bold text-sm text-gray-900 line-clamp-1 leading-snug">
                     {product.title}
                   </h3>
@@ -403,7 +308,7 @@ export default function BestSellingProducts() {
                 >
                   {/* Image Box */}
                   <div className="relative aspect-square w-full bg-gray-50 rounded-lg overflow-hidden mb-2">
-                    <Link href="/shop" className="block w-full h-full">
+                    <Link href={`/product/${product.id}`} className="block w-full h-full">
                       <img 
                         src={product.image} 
                         alt={product.title} 
@@ -432,7 +337,7 @@ export default function BestSellingProducts() {
                   
                   {/* Details */}
                   <div className="flex flex-col flex-1">
-                    <Link href="/shop">
+                    <Link href={`/product/${product.id}`}>
                       <h3 className="font-bold text-xs text-gray-900 line-clamp-1 leading-snug">
                         {product.title}
                       </h3>
