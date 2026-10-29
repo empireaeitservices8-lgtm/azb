@@ -13,7 +13,15 @@ import {
   CreditCard, 
   ArrowLeft, 
   ShieldCheck,
-  Truck
+  Truck,
+  Banknote,
+  Clock,
+  MapPin,
+  Phone,
+  Mail,
+  FileText,
+  BadgeCheck,
+  AlertCircle
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -21,28 +29,35 @@ export default function CartPage() {
   const { cart, removeFromCart, updateQuantity, totalPrice, clearCart } = useCart();
 
   const [checkoutStep, setCheckoutStep] = useState<'cart' | 'checkout' | 'success'>('cart');
+  const [paymentMethod, setPaymentMethod] = useState<'cod' | 'razorpay'>('cod');
   const [isProcessing, setIsProcessing] = useState(false);
 
   // Customer Shipping Information
   const [shippingInfo, setShippingInfo] = useState({
     fullName: '',
     phone: '',
+    email: '',
     address: '',
     city: '',
-    pincode: ''
+    state: 'Kerala',
+    pincode: '',
+    notes: ''
   });
 
   // Placed Order Snapshot for Success Screen
   const [placedOrder, setPlacedOrder] = useState<{
-    orderId: string;
+    orderId: string | number;
+    wcOrderId?: number;
     paymentId?: string;
     itemsCount: number;
     amount: number;
     method: string;
+    isCOD: boolean;
     customer: typeof shippingInfo;
+    items: typeof cart;
   } | null>(null);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setShippingInfo({
       ...shippingInfo,
       [e.target.name]: e.target.value
@@ -62,31 +77,97 @@ export default function CartPage() {
     });
   };
 
-  const handlePlaceOrder = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const validateForm = () => {
     if (!shippingInfo.fullName.trim()) {
       toast.error('Please enter your full name');
-      return;
+      return false;
     }
     const cleanPhone = shippingInfo.phone.replace(/\D/g, '');
     if (cleanPhone.length < 10) {
       toast.error('Please enter a valid 10-digit mobile number');
-      return;
+      return false;
     }
     if (!shippingInfo.address.trim()) {
-      toast.error('Please enter your delivery address');
-      return;
+      toast.error('Please enter your complete delivery address');
+      return false;
+    }
+    if (!shippingInfo.city.trim()) {
+      toast.error('Please enter your city or district');
+      return false;
     }
     if (!shippingInfo.pincode.trim() || shippingInfo.pincode.trim().length < 6) {
       toast.error('Please enter a valid 6-digit PIN code');
+      return false;
+    }
+    return true;
+  };
+
+  const handlePlaceOrder = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!validateForm()) return;
+    if (cart.length === 0) {
+      toast.error('Your cart is empty');
       return;
     }
 
     setIsProcessing(true);
 
+    // ==========================================
+    // 1. CASH ON DELIVERY (COD) WORKFLOW
+    // ==========================================
+    if (paymentMethod === 'cod') {
+      const toastId = toast.loading('Placing your Cash on Delivery order with WordPress...');
+      try {
+        const res = await fetch('/api/orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            paymentMethod: 'cod',
+            customer: shippingInfo,
+            items: cart,
+            amount: totalPrice
+          })
+        });
+
+        const data = await res.json();
+        toast.dismiss(toastId);
+
+        if (!res.ok || !data.success) {
+          toast.error(data.error || 'Failed to place COD order. Please try again.');
+          setIsProcessing(false);
+          return;
+        }
+
+        // Set snapshot of placed order for success screen
+        setPlacedOrder({
+          orderId: data.orderNumber || data.orderId,
+          wcOrderId: data.orderId,
+          itemsCount: cart.reduce((acc, i) => acc + i.quantity, 0),
+          amount: totalPrice,
+          method: 'Cash on Delivery (COD)',
+          isCOD: true,
+          customer: { ...shippingInfo },
+          items: [...cart]
+        });
+
+        clearCart();
+        setIsProcessing(false);
+        setCheckoutStep('success');
+        toast.success('Order placed successfully! Cash on delivery confirmed.');
+      } catch (err: any) {
+        toast.dismiss(toastId);
+        console.error('COD Order Error:', err);
+        toast.error('Network error placing order. Please try again.');
+        setIsProcessing(false);
+      }
+      return;
+    }
+
+    // ==========================================
+    // 2. RAZORPAY ONLINE PAYMENT WORKFLOW
+    // ==========================================
     try {
-      // Create Razorpay Order
       const res = await fetch('/api/razorpay/order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -103,21 +184,21 @@ export default function CartPage() {
       });
 
       if (!res.ok) {
-        toast.error('Failed to initiate Razorpay order. Please try again.');
+        toast.error('Failed to initiate Razorpay payment. Please try again or choose COD.');
         setIsProcessing(false);
         return;
       }
 
       const orderData = await res.json();
 
-      // If Razorpay live/test credentials are not configured in .env.local yet, run in simulated demo test mode
+      // Demo/preview mode fallback if keys not configured
       if (orderData.isDemo) {
         toast.loading('Processing Razorpay Test Checkout...', { duration: 1500 });
         setTimeout(async () => {
           const demoPaymentId = `pay_demo_${Math.floor(100000 + Math.random() * 900000)}`;
 
           try {
-            await fetch('/api/razorpay/verify', {
+            const verifyRes = await fetch('/api/razorpay/verify', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
@@ -128,18 +209,32 @@ export default function CartPage() {
                 amount: totalPrice
               })
             });
-          } catch (e) {
-            console.error('Error recording demo order:', e);
-          }
+            const verifyData = await verifyRes.json();
 
-          setPlacedOrder({
-            orderId: orderData.orderId,
-            paymentId: demoPaymentId,
-            itemsCount: cart.reduce((acc, i) => acc + i.quantity, 0),
-            amount: totalPrice,
-            method: 'Razorpay Online Payment (Demo / Test Mode)',
-            customer: { ...shippingInfo }
-          });
+            setPlacedOrder({
+              orderId: verifyData.wcOrderNumber || verifyData.wcOrderId || orderData.orderId,
+              wcOrderId: verifyData.wcOrderId,
+              paymentId: demoPaymentId,
+              itemsCount: cart.reduce((acc, i) => acc + i.quantity, 0),
+              amount: totalPrice,
+              method: 'Razorpay Online Payment (Demo / Test Mode)',
+              isCOD: false,
+              customer: { ...shippingInfo },
+              items: [...cart]
+            });
+          } catch (e) {
+            console.error('Error recording demo order in WooCommerce:', e);
+            setPlacedOrder({
+              orderId: orderData.orderId,
+              paymentId: demoPaymentId,
+              itemsCount: cart.reduce((acc, i) => acc + i.quantity, 0),
+              amount: totalPrice,
+              method: 'Razorpay Online Payment',
+              isCOD: false,
+              customer: { ...shippingInfo },
+              items: [...cart]
+            });
+          }
 
           clearCart();
           setIsProcessing(false);
@@ -149,7 +244,7 @@ export default function CartPage() {
         return;
       }
 
-      // Standard Razorpay live / test checkout flow
+      // Live Razorpay popup flow
       const isLoaded = await loadRazorpayScript();
       if (!isLoaded) {
         toast.error('Razorpay SDK failed to load. Please check your internet connection.');
@@ -167,14 +262,15 @@ export default function CartPage() {
         order_id: orderData.orderId,
         prefill: {
           name: shippingInfo.fullName,
-          contact: shippingInfo.phone
+          contact: shippingInfo.phone,
+          email: shippingInfo.email || ''
         },
         theme: {
           color: '#000000'
         },
         handler: async function (response: any) {
           try {
-            toast.loading('Verifying Razorpay payment...');
+            toast.loading('Verifying payment & syncing order with WooCommerce...');
             const verifyRes = await fetch('/api/razorpay/verify', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -191,18 +287,21 @@ export default function CartPage() {
             const verifyData = await verifyRes.json();
             if (verifyData.success) {
               setPlacedOrder({
-                orderId: response.razorpay_order_id,
+                orderId: verifyData.wcOrderNumber || verifyData.wcOrderId || response.razorpay_order_id,
+                wcOrderId: verifyData.wcOrderId,
                 paymentId: response.razorpay_payment_id,
                 itemsCount: cart.reduce((acc, i) => acc + i.quantity, 0),
                 amount: totalPrice,
-                method: 'Razorpay Online Payment (Verified)',
-                customer: { ...shippingInfo }
+                method: 'Razorpay Online Payment (Paid)',
+                isCOD: false,
+                customer: { ...shippingInfo },
+                items: [...cart]
               });
               clearCart();
               setCheckoutStep('success');
-              toast.success('Payment completed successfully!');
+              toast.success('Payment completed & order created in WordPress!');
             } else {
-              toast.error('Payment verification failed.');
+              toast.error(verifyData.error || 'Payment verification failed.');
             }
           } catch (err) {
             console.error('Verification error:', err);
@@ -232,66 +331,138 @@ export default function CartPage() {
     }
   };
 
-  // SUCCESS SCREEN
+  // ========================================================
+  // 3. SUCCESS SCREEN (CONFIRMATION FOR COD & RAZORPAY)
+  // ========================================================
   if (checkoutStep === 'success' && placedOrder) {
     return (
-      <div className='container mx-auto px-4 py-16 md:py-24 max-w-2xl'>
-        <div className='bg-white rounded-3xl shadow-sm border border-gray-100 p-6 sm:p-10 text-center'>
-          <div className='w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xs animate-bounce'>
-            <CheckCircle2 size={44} />
+      <div className='container mx-auto px-4 py-12 md:py-20 max-w-3xl'>
+        <div className='bg-white rounded-3xl shadow-lg border border-gray-100 p-6 sm:p-10 text-center relative overflow-hidden'>
+          {/* Subtle top banner glow */}
+          <div className='absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-emerald-500 via-yellow-400 to-blue-500'></div>
+
+          <div className='w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm'>
+            <CheckCircle2 size={46} className='animate-pulse' />
           </div>
 
           <h1 className='text-2xl sm:text-3xl font-extrabold text-gray-900 mb-2'>
             Order Placed Successfully!
           </h1>
-          <p className='text-sm text-gray-500 mb-6'>
-            Thank you for shopping with AZB Store. Your payment has been received and order is confirmed.
+          <p className='text-sm sm:text-base text-gray-600 mb-6 max-w-lg mx-auto'>
+            {placedOrder.isCOD ? (
+              <span>Your order has been recorded in our store. You can pay with cash or UPI scanner when the package is delivered.</span>
+            ) : (
+              <span>Thank you for your purchase! Your online payment was verified and order details have been synchronized with WordPress.</span>
+            )}
           </p>
 
-          <div className='bg-gray-50 rounded-2xl p-5 sm:p-6 text-left border border-gray-200/80 mb-8 space-y-3 text-sm'>
-            <div className='flex justify-between items-center border-b border-gray-200 pb-3'>
-              <span className='text-gray-500 font-medium'>Order ID:</span>
-              <span className='font-mono font-bold text-gray-900 text-base'>#{placedOrder.orderId}</span>
+          {/* Order Details Summary Card */}
+          <div className='bg-gray-50/90 rounded-2xl p-5 sm:p-7 text-left border border-gray-200/80 mb-8 space-y-4 text-sm'>
+            <div className='flex flex-wrap justify-between items-center border-b border-gray-200 pb-3 gap-2'>
+              <span className='text-gray-500 font-medium flex items-center gap-1.5'>
+                <FileText size={16} className='text-gray-400' /> WooCommerce Order ID:
+              </span>
+              <span className='font-mono font-extrabold text-gray-900 text-base sm:text-lg bg-white px-3 py-1 rounded-lg border border-gray-200 shadow-2xs'>
+                #{placedOrder.orderId}
+              </span>
             </div>
 
-            <div className='flex justify-between items-center border-b border-gray-200 pb-3'>
-              <span className='text-gray-500 font-medium'>Payment Gateway:</span>
-              <span className='font-bold text-blue-700 flex items-center gap-1.5'>
-                <ShieldCheck size={16} className='text-blue-600' />
-                {placedOrder.method}
+            <div className='flex flex-wrap justify-between items-center border-b border-gray-200 pb-3 gap-2'>
+              <span className='text-gray-500 font-medium flex items-center gap-1.5'>
+                {placedOrder.isCOD ? (
+                  <Banknote size={16} className='text-emerald-600' />
+                ) : (
+                  <ShieldCheck size={16} className='text-blue-600' />
+                )}
+                Payment Method:
+              </span>
+              <span className={`font-bold flex items-center gap-1.5 px-3 py-1 rounded-full text-xs sm:text-sm ${
+                placedOrder.isCOD 
+                  ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' 
+                  : 'bg-blue-50 text-blue-800 border border-blue-200'
+              }`}>
+                {placedOrder.isCOD ? (
+                  <>
+                    <Truck size={14} className='text-emerald-600' />
+                    Cash on Delivery (Pay upon delivery)
+                  </>
+                ) : (
+                  <>
+                    <BadgeCheck size={14} className='text-blue-600' />
+                    Razorpay Online (Paid)
+                  </>
+                )}
               </span>
             </div>
 
             {placedOrder.paymentId && (
-              <div className='flex justify-between items-center border-b border-gray-200 pb-3'>
+              <div className='flex flex-wrap justify-between items-center border-b border-gray-200 pb-3 gap-2'>
                 <span className='text-gray-500 font-medium'>Razorpay Payment ID:</span>
-                <span className='font-mono font-bold text-gray-900 text-xs sm:text-sm bg-gray-100 px-2 py-0.5 rounded'>
+                <span className='font-mono font-bold text-gray-900 text-xs sm:text-sm bg-gray-100 px-2.5 py-1 rounded border border-gray-200'>
                   {placedOrder.paymentId}
                 </span>
               </div>
             )}
 
             <div className='flex justify-between items-center border-b border-gray-200 pb-3'>
-              <span className='text-gray-500 font-medium'>Total Amount Paid:</span>
-              <span className='font-extrabold text-lg text-gray-900'>₹{placedOrder.amount}</span>
+              <span className='text-gray-500 font-medium'>Total Amount:</span>
+              <span className='font-extrabold text-xl text-gray-900'>₹{placedOrder.amount}</span>
             </div>
 
-            <div className='flex justify-between items-start pt-1'>
-              <span className='text-gray-500 font-medium'>Delivery Address:</span>
-              <span className='text-right text-gray-800 font-medium max-w-[240px]'>
-                {placedOrder.customer.fullName}<br />
-                {placedOrder.customer.address}, {placedOrder.customer.city} - {placedOrder.customer.pincode}<br />
-                Phone: {placedOrder.customer.phone}
+            {/* Delivery address snapshot */}
+            <div className='flex flex-col sm:flex-row justify-between items-start pt-1 gap-2'>
+              <span className='text-gray-500 font-medium flex items-center gap-1.5'>
+                <MapPin size={16} className='text-gray-400' /> Delivery Address:
               </span>
+              <div className='text-left sm:text-right text-gray-800 font-medium max-w-sm'>
+                <p className='font-bold text-gray-900'>{placedOrder.customer.fullName}</p>
+                <p className='text-xs text-gray-600'>{placedOrder.customer.address}</p>
+                <p className='text-xs text-gray-600'>
+                  {placedOrder.customer.city}, {placedOrder.customer.state} - {placedOrder.customer.pincode}
+                </p>
+                <p className='text-xs text-gray-600 mt-1 flex items-center gap-1 sm:justify-end'>
+                  <Phone size={12} /> {placedOrder.customer.phone}
+                </p>
+              </div>
             </div>
+
+            {/* Ordered items preview */}
+            {placedOrder.items && placedOrder.items.length > 0 && (
+              <div className='border-t border-gray-200 pt-3 mt-2'>
+                <p className='text-xs font-bold text-gray-500 uppercase tracking-wider mb-2'>
+                  Items Ordered ({placedOrder.itemsCount})
+                </p>
+                <div className='divide-y divide-gray-100 bg-white rounded-xl border border-gray-200/80 p-2'>
+                  {placedOrder.items.map((item) => (
+                    <div key={item.id} className='py-2 px-2 flex items-center justify-between text-xs'>
+                      <div className='flex items-center gap-2.5 min-w-0'>
+                        <img src={item.image} alt={item.title} className='w-9 h-9 rounded object-cover bg-gray-100 flex-shrink-0' />
+                        <div className='truncate'>
+                          <p className='font-bold text-gray-900 truncate'>{item.title}</p>
+                          <p className='text-[11px] text-gray-500'>Qty: {item.quantity}</p>
+                        </div>
+                      </div>
+                      <span className='font-bold text-gray-900 ml-2'>₹{item.price * item.quantity}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
+          {/* Action buttons */}
           <div className='flex flex-col sm:flex-row gap-3 justify-center'>
             <Link
               href='/shop'
-              className='bg-black text-white hover:bg-gray-800 font-bold py-3.5 px-8 rounded-xl transition-colors text-sm uppercase tracking-wide'
+              className='bg-black text-white hover:bg-gray-800 font-bold py-3.5 px-8 rounded-xl transition-colors text-sm uppercase tracking-wide shadow-md'
             >
               Continue Shopping
+            </Link>
+            <Link
+              href='/'
+              className='bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-3.5 px-8 rounded-xl transition-colors text-sm uppercase tracking-wide'
+            >
+              Back to Home
             </Link>
           </div>
         </div>
@@ -299,21 +470,25 @@ export default function CartPage() {
     );
   }
 
-  // EMPTY CART SCREEN
+  // ========================================================
+  // 4. EMPTY CART SCREEN
+  // ========================================================
   if (cart.length === 0) {
     return (
       <div className='container mx-auto px-4 py-32 text-center min-h-[60vh] flex flex-col items-center justify-center'>
         <ShoppingBag size={64} className='text-gray-300 mb-6' />
         <h1 className='text-2xl sm:text-4xl font-bold mb-4 text-gray-800'>Your Cart is Empty</h1>
         <p className='text-gray-500 mb-8'>Looks like you haven't added anything to your cart yet.</p>
-        <Link href='/shop' className='bg-yellow-500 hover:bg-yellow-400 text-black font-bold py-3 px-8 rounded-full transition-colors'>
+        <Link href='/shop' className='bg-yellow-500 hover:bg-yellow-400 text-black font-bold py-3 px-8 rounded-full transition-colors shadow-sm'>
           Start Shopping
         </Link>
       </div>
     );
   }
 
-  // CHECKOUT FORM SCREEN
+  // ========================================================
+  // 5. CHECKOUT SCREEN (COD + RAZORPAY)
+  // ========================================================
   if (checkoutStep === 'checkout') {
     return (
       <div className='container mx-auto px-4 py-10 md:py-14 max-w-5xl'>
@@ -325,7 +500,17 @@ export default function CartPage() {
           <ArrowLeft size={16} /> Back to Cart
         </button>
 
-        <h1 className='text-2xl sm:text-3xl font-extrabold text-gray-900 mb-8'>Checkout & Payment</h1>
+        <div className='flex items-center justify-between mb-8'>
+          <div>
+            <h1 className='text-2xl sm:text-3xl font-extrabold text-gray-900'>Checkout</h1>
+            <p className='text-xs sm:text-sm text-gray-500 mt-1'>
+              Complete your delivery details and choose your preferred payment method.
+            </p>
+          </div>
+          <span className='hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200'>
+            <ShieldCheck size={14} /> 100% Safe & Secure
+          </span>
+        </div>
 
         <form onSubmit={handlePlaceOrder} className='grid grid-cols-1 lg:grid-cols-12 gap-8'>
           {/* Left Column: Delivery Address & Payment Method */}
@@ -367,6 +552,33 @@ export default function CartPage() {
                   </div>
 
                   <div>
+                    <label className='block text-xs font-bold text-gray-700 uppercase mb-1'>Email Address (Optional)</label>
+                    <input
+                      type='email'
+                      name='email'
+                      value={shippingInfo.email}
+                      onChange={handleInputChange}
+                      placeholder='For order tracking updates'
+                      className='w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-400 text-sm'
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className='block text-xs font-bold text-gray-700 uppercase mb-1'>Delivery Address *</label>
+                  <textarea
+                    name='address'
+                    value={shippingInfo.address}
+                    onChange={handleInputChange}
+                    placeholder='House / Flat No, Building, Street, Area, Landmark'
+                    required
+                    rows={2}
+                    className='w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-400 text-sm resize-none'
+                  />
+                </div>
+
+                <div className='grid grid-cols-1 sm:grid-cols-3 gap-4'>
+                  <div>
                     <label className='block text-xs font-bold text-gray-700 uppercase mb-1'>PIN Code *</label>
                     <input
                       type='text'
@@ -379,106 +591,180 @@ export default function CartPage() {
                       className='w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-400 text-sm'
                     />
                   </div>
+
+                  <div>
+                    <label className='block text-xs font-bold text-gray-700 uppercase mb-1'>City / District *</label>
+                    <input
+                      type='text'
+                      name='city'
+                      value={shippingInfo.city}
+                      onChange={handleInputChange}
+                      placeholder='City or District'
+                      required
+                      className='w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-400 text-sm'
+                    />
+                  </div>
+
+                  <div>
+                    <label className='block text-xs font-bold text-gray-700 uppercase mb-1'>State</label>
+                    <input
+                      type='text'
+                      name='state'
+                      value={shippingInfo.state}
+                      onChange={handleInputChange}
+                      placeholder='State'
+                      className='w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-400 text-sm'
+                    />
+                  </div>
                 </div>
 
                 <div>
-                  <label className='block text-xs font-bold text-gray-700 uppercase mb-1'>Delivery Address *</label>
-                  <textarea
-                    name='address'
-                    value={shippingInfo.address}
-                    onChange={handleInputChange}
-                    placeholder='House / Flat No, Street, Landmark, Area'
-                    required
-                    rows={2}
-                    className='w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-400 text-sm resize-none'
-                  />
-                </div>
-
-                <div>
-                  <label className='block text-xs font-bold text-gray-700 uppercase mb-1'>City / District</label>
+                  <label className='block text-xs font-bold text-gray-700 uppercase mb-1'>Order Notes / Delivery Instructions (Optional)</label>
                   <input
                     type='text'
-                    name='city'
-                    value={shippingInfo.city}
+                    name='notes'
+                    value={shippingInfo.notes}
                     onChange={handleInputChange}
-                    placeholder='City or District'
-                    className='w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-400 text-sm'
+                    placeholder='e.g., Near landmark, call before delivery'
+                    className='w-full px-4 py-2 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-400 text-xs'
                   />
                 </div>
               </div>
             </div>
 
-            {/* Payment Method Card - EXCLUSIVELY RAZORPAY */}
+            {/* Payment Method Card - COD & RAZORPAY OPTIONS */}
             <div className='bg-white rounded-2xl shadow-xs border border-gray-200 p-6'>
               <div className='flex items-center justify-between mb-4'>
                 <h2 className='text-base sm:text-lg font-bold text-gray-900 flex items-center gap-2'>
-                  <ShieldCheck size={20} className='text-blue-600' />
-                  2. Payment Method
+                  <Wallet size={20} className='text-yellow-500' />
+                  2. Select Payment Method
                 </h2>
-                <span className='inline-flex items-center gap-1 text-[11px] font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-full border border-blue-200'>
-                  <ShieldCheck size={12} />
-                  Razorpay Verified
+                <span className='text-xs font-medium text-gray-500'>
+                  Choose how you'd like to pay
                 </span>
               </div>
 
-              {/* Sole Razorpay Gateway Option */}
-              <div className='p-5 rounded-2xl border-2 border-blue-600 bg-gradient-to-br from-blue-50/70 via-white to-amber-50/30 shadow-xs'>
-                <div className='flex items-start justify-between gap-3'>
-                  <div className='flex items-center gap-3'>
-                    <div className='w-5 h-5 rounded-full border-2 border-blue-600 flex items-center justify-center bg-white mt-0.5'>
-                      <div className='w-2.5 h-2.5 rounded-full bg-blue-600'></div>
-                    </div>
-                    <div>
-                      <div className='flex items-center gap-2 flex-wrap'>
-                        <span className='font-extrabold text-gray-900 text-base'>Razorpay Secure Checkout</span>
-                        <span className='text-[10px] font-bold uppercase tracking-wider bg-black text-white px-2 py-0.5 rounded'>Official</span>
+              <div className='space-y-4'>
+                {/* OPTION 1: CASH ON DELIVERY (COD) */}
+                <label 
+                  onClick={() => setPaymentMethod('cod')}
+                  className={`block p-4 sm:p-5 rounded-2xl border-2 transition-all cursor-pointer relative ${
+                    paymentMethod === 'cod'
+                      ? 'border-emerald-600 bg-gradient-to-br from-emerald-50/70 via-white to-amber-50/20 shadow-sm'
+                      : 'border-gray-200 hover:border-gray-300 bg-white'
+                  }`}
+                >
+                  <div className='flex items-start gap-3.5'>
+                    <input
+                      type='radio'
+                      name='paymentMethodRadio'
+                      checked={paymentMethod === 'cod'}
+                      onChange={() => setPaymentMethod('cod')}
+                      className='mt-1 w-4 h-4 text-emerald-600 focus:ring-emerald-500 accent-emerald-600 cursor-pointer'
+                    />
+                    <div className='flex-1'>
+                      <div className='flex items-center justify-between flex-wrap gap-2'>
+                        <div className='flex items-center gap-2'>
+                          <span className='font-extrabold text-gray-900 text-base flex items-center gap-1.5'>
+                            <Banknote size={18} className='text-emerald-600' />
+                            Cash on Delivery (COD)
+                          </span>
+                        </div>
+                        <span className='text-[10px] font-extrabold uppercase tracking-wider bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full border border-emerald-300'>
+                          Pay at Doorstep
+                        </span>
                       </div>
-                      <p className='text-xs text-gray-600 mt-1'>
-                        All payment methods supported directly in one unified, instant popup.
+
+                      <p className='text-xs text-gray-600 mt-1.5 leading-relaxed'>
+                        Pay in cash or scan UPI when your package arrives at your doorstep. Zero advance payment needed.
                       </p>
+
+                      {/* COD benefits */}
+                      <div className='flex flex-wrap items-center gap-3 mt-3 pt-3 border-t border-emerald-100 text-[11px] text-gray-600 font-medium'>
+                        <span className='flex items-center gap-1 text-emerald-700 font-semibold'>
+                          <CheckCircle2 size={13} /> Direct Delivery
+                        </span>
+                        <span className='text-gray-300'>•</span>
+                        <span className='flex items-center gap-1'>
+                          <Truck size={13} className='text-gray-500' /> Inspect & Pay
+                        </span>
+                        <span className='text-gray-300'>•</span>
+                        <span className='flex items-center gap-1'>
+                          <Smartphone size={13} className='text-gray-500' /> Cash or UPI on delivery
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
+                </label>
 
-                {/* Grid of supported payment channels under Razorpay */}
-                <div className='grid grid-cols-2 sm:grid-cols-4 gap-2.5 mt-4 pt-4 border-t border-gray-200/80'>
-                  <div className='bg-white p-2.5 rounded-xl border border-gray-200 flex flex-col items-center text-center shadow-2xs'>
-                    <Smartphone size={20} className='text-green-600 mb-1' />
-                    <span className='text-[11px] font-bold text-gray-800'>UPI Apps</span>
-                    <span className='text-[9px] text-gray-500'>GPay, PhonePe, Paytm, QR</span>
+                {/* OPTION 2: RAZORPAY ONLINE PAYMENT */}
+                <label 
+                  onClick={() => setPaymentMethod('razorpay')}
+                  className={`block p-4 sm:p-5 rounded-2xl border-2 transition-all cursor-pointer relative ${
+                    paymentMethod === 'razorpay'
+                      ? 'border-blue-600 bg-gradient-to-br from-blue-50/70 via-white to-amber-50/20 shadow-sm'
+                      : 'border-gray-200 hover:border-gray-300 bg-white'
+                  }`}
+                >
+                  <div className='flex items-start gap-3.5'>
+                    <input
+                      type='radio'
+                      name='paymentMethodRadio'
+                      checked={paymentMethod === 'razorpay'}
+                      onChange={() => setPaymentMethod('razorpay')}
+                      className='mt-1 w-4 h-4 text-blue-600 focus:ring-blue-500 accent-blue-600 cursor-pointer'
+                    />
+                    <div className='flex-1'>
+                      <div className='flex items-center justify-between flex-wrap gap-2'>
+                        <div className='flex items-center gap-2'>
+                          <span className='font-extrabold text-gray-900 text-base flex items-center gap-1.5'>
+                            <ShieldCheck size={18} className='text-blue-600' />
+                            Online Payment (Razorpay)
+                          </span>
+                        </div>
+                        <span className='text-[10px] font-extrabold uppercase tracking-wider bg-blue-100 text-blue-800 px-2.5 py-0.5 rounded-full border border-blue-300'>
+                          Instant Confirmation
+                        </span>
+                      </div>
+
+                      <p className='text-xs text-gray-600 mt-1.5 leading-relaxed'>
+                        Pay securely with UPI (Google Pay, PhonePe, Paytm), Debit/Credit Card, Net Banking, or Wallets.
+                      </p>
+
+                      {/* Razorpay Badges */}
+                      <div className='grid grid-cols-2 sm:grid-cols-4 gap-2 mt-3 pt-3 border-t border-blue-100'>
+                        <div className='bg-white p-2 rounded-lg border border-gray-200 flex items-center justify-center gap-1.5 text-center shadow-2xs'>
+                          <Smartphone size={14} className='text-emerald-600' />
+                          <span className='text-[11px] font-bold text-gray-800'>UPI / QR</span>
+                        </div>
+                        <div className='bg-white p-2 rounded-lg border border-gray-200 flex items-center justify-center gap-1.5 text-center shadow-2xs'>
+                          <CreditCard size={14} className='text-blue-600' />
+                          <span className='text-[11px] font-bold text-gray-800'>Cards</span>
+                        </div>
+                        <div className='bg-white p-2 rounded-lg border border-gray-200 flex items-center justify-center gap-1.5 text-center shadow-2xs'>
+                          <Wallet size={14} className='text-purple-600' />
+                          <span className='text-[11px] font-bold text-gray-800'>NetBanking</span>
+                        </div>
+                        <div className='bg-white p-2 rounded-lg border border-gray-200 flex items-center justify-center gap-1.5 text-center shadow-2xs'>
+                          <ShieldCheck size={14} className='text-amber-600' />
+                          <span className='text-[11px] font-bold text-gray-800'>Wallets</span>
+                        </div>
+                      </div>
+
+                      <div className='mt-2.5 flex items-center justify-between text-[11px] text-gray-500'>
+                        <span className='flex items-center gap-1 text-emerald-700 font-semibold'>
+                          <ShieldCheck size={12} /> 256-Bit SSL Bank-Grade Encryption
+                        </span>
+                        <span className='text-gray-400'>PCI-DSS Compliant</span>
+                      </div>
+                    </div>
                   </div>
-
-                  <div className='bg-white p-2.5 rounded-xl border border-gray-200 flex flex-col items-center text-center shadow-2xs'>
-                    <CreditCard size={20} className='text-blue-600 mb-1' />
-                    <span className='text-[11px] font-bold text-gray-800'>Cards</span>
-                    <span className='text-[9px] text-gray-500'>Visa, RuPay, MasterCard</span>
-                  </div>
-
-                  <div className='bg-white p-2.5 rounded-xl border border-gray-200 flex flex-col items-center text-center shadow-2xs'>
-                    <Wallet size={20} className='text-purple-600 mb-1' />
-                    <span className='text-[11px] font-bold text-gray-800'>Net Banking</span>
-                    <span className='text-[9px] text-gray-500'>50+ Indian Banks</span>
-                  </div>
-
-                  <div className='bg-white p-2.5 rounded-xl border border-gray-200 flex flex-col items-center text-center shadow-2xs'>
-                    <ShieldCheck size={20} className='text-amber-600 mb-1' />
-                    <span className='text-[11px] font-bold text-gray-800'>Wallets</span>
-                    <span className='text-[9px] text-gray-500'>Mobikwik, Amazon Pay & More</span>
-                  </div>
-                </div>
-
-                {/* Trust and compliance footnote */}
-                <div className='mt-3.5 pt-3 border-t border-gray-200/70 flex items-center justify-between text-[11px] text-gray-500 flex-wrap gap-2'>
-                  <span className='flex items-center gap-1 text-green-700 font-semibold'>
-                    <ShieldCheck size={13} /> 256-Bit SSL Bank-Grade Encryption
-                  </span>
-                  <span className='text-gray-400'>PCI-DSS Level 1 Certified</span>
-                </div>
+                </label>
               </div>
             </div>
           </div>
 
-          {/* Right Column: Order Summary & Place Order */}
+          {/* Right Column: Order Summary & Action Button */}
           <div className='lg:col-span-5'>
             <div className='bg-white rounded-2xl shadow-xs border border-gray-200 p-6 sticky top-24'>
               <h2 className='text-base sm:text-lg font-bold text-gray-900 mb-4'>Order Summary</h2>
@@ -499,38 +785,70 @@ export default function CartPage() {
 
               <div className='space-y-3 text-sm border-t border-gray-100 pt-3'>
                 <div className='flex justify-between text-gray-600'>
-                  <span>Subtotal</span>
+                  <span>Subtotal ({cart.reduce((a, b) => a + b.quantity, 0)} items)</span>
                   <span className='font-bold text-gray-900'>₹{totalPrice}</span>
                 </div>
                 <div className='flex justify-between text-gray-600'>
-                  <span>Delivery</span>
-                  <span className='font-bold text-green-600'>Free</span>
+                  <span>Delivery Charges</span>
+                  <span className='font-bold text-emerald-600'>FREE</span>
+                </div>
+                <div className='flex justify-between text-gray-600'>
+                  <span>Payment Type</span>
+                  <span className='font-semibold text-gray-800'>
+                    {paymentMethod === 'cod' ? 'Cash on Delivery' : 'Razorpay Online'}
+                  </span>
                 </div>
                 <div className='border-t border-gray-100 pt-3 flex justify-between items-end'>
-                  <span className='font-bold text-gray-900 text-base'>Total Amount</span>
+                  <div>
+                    <span className='font-bold text-gray-900 text-base'>Total Payable</span>
+                    <p className='text-[11px] text-gray-400'>Inclusive of all taxes</p>
+                  </div>
                   <span className='font-extrabold text-2xl text-gray-900'>₹{totalPrice}</span>
                 </div>
               </div>
 
-              {/* Razorpay Order CTA */}
-              <button
-                type='submit'
-                disabled={isProcessing}
-                className='w-full bg-blue-600 hover:bg-blue-700 text-white font-extrabold py-4 rounded-xl mt-6 transition-all text-sm uppercase tracking-wider cursor-pointer flex items-center justify-center gap-2 shadow-lg hover:shadow-blue-200 active:scale-[0.99]'
-              >
-                {isProcessing ? (
-                  <div className='animate-spin rounded-full h-5 w-5 border-b-2 border-white'></div>
-                ) : (
-                  <>
-                    <ShieldCheck size={18} className='text-yellow-300' />
-                    <span>Pay ₹{totalPrice} via Razorpay</span>
-                  </>
-                )}
-              </button>
+              {/* DYNAMIC SUBMIT BUTTON ACCORDING TO PAYMENT METHOD */}
+              {paymentMethod === 'cod' ? (
+                <button
+                  type='submit'
+                  disabled={isProcessing}
+                  className='w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-4 rounded-xl mt-6 transition-all text-sm uppercase tracking-wider cursor-pointer flex items-center justify-center gap-2 shadow-lg hover:shadow-emerald-200 active:scale-[0.99] disabled:opacity-50'
+                >
+                  {isProcessing ? (
+                    <div className='flex items-center gap-2'>
+                      <div className='animate-spin rounded-full h-5 w-5 border-b-2 border-white'></div>
+                      <span>Placing Order in WordPress...</span>
+                    </div>
+                  ) : (
+                    <>
+                      <Truck size={18} />
+                      <span>Confirm Order (COD) • ₹{totalPrice}</span>
+                    </>
+                  )}
+                </button>
+              ) : (
+                <button
+                  type='submit'
+                  disabled={isProcessing}
+                  className='w-full bg-blue-600 hover:bg-blue-700 text-white font-extrabold py-4 rounded-xl mt-6 transition-all text-sm uppercase tracking-wider cursor-pointer flex items-center justify-center gap-2 shadow-lg hover:shadow-blue-200 active:scale-[0.99] disabled:opacity-50'
+                >
+                  {isProcessing ? (
+                    <div className='flex items-center gap-2'>
+                      <div className='animate-spin rounded-full h-5 w-5 border-b-2 border-white'></div>
+                      <span>Opening Secure Checkout...</span>
+                    </div>
+                  ) : (
+                    <>
+                      <ShieldCheck size={18} className='text-yellow-300' />
+                      <span>Pay ₹{totalPrice} via Razorpay</span>
+                    </>
+                  )}
+                </button>
+              )}
 
               <div className='mt-4 flex items-center justify-center gap-1.5 text-xs text-gray-400'>
-                <ShieldCheck size={14} className='text-green-500' />
-                <span>100% Safe & Secure Checkout</span>
+                <ShieldCheck size={14} className='text-emerald-500' />
+                <span>Synchronized with WooCommerce Admin</span>
               </div>
             </div>
           </div>
@@ -539,7 +857,9 @@ export default function CartPage() {
     );
   }
 
-  // STANDARD CART VIEW
+  // ========================================================
+  // 6. STANDARD CART ITEMS VIEW
+  // ========================================================
   return (
     <div className='container mx-auto px-4 py-12 md:py-16'>
       <h1 className='text-2xl sm:text-3xl font-bold mb-8 text-gray-900'>Shopping Cart</h1>
@@ -606,7 +926,7 @@ export default function CartPage() {
           </div>
         </div>
         
-        {/* Order Summary & Checkout Button */}
+        {/* Order Summary & Proceed Button */}
         <div className='lg:w-1/3'>
           <div className='bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sticky top-24'>
             <h2 className='text-lg font-bold text-gray-900 mb-6'>Order Summary</h2>
@@ -618,7 +938,7 @@ export default function CartPage() {
               </div>
               <div className='flex justify-between text-gray-600'>
                 <span>Shipping</span>
-                <span className='font-bold text-green-600'>Free</span>
+                <span className='font-bold text-emerald-600'>Free</span>
               </div>
               <div className='border-t border-gray-100 pt-4 flex justify-between items-end'>
                 <span className='font-bold text-gray-900 text-base'>Total</span>
@@ -634,9 +954,17 @@ export default function CartPage() {
               Proceed to Checkout
             </button>
             
-            <p className='text-xs text-center text-gray-400 mt-4'>
-              Taxes included. Free delivery all over India.
-            </p>
+            <div className='mt-4 pt-4 border-t border-gray-100 space-y-2 text-xs text-gray-500'>
+              <div className='flex items-center gap-2 text-emerald-700 font-medium'>
+                <CheckCircle2 size={14} /> Cash on Delivery Available
+              </div>
+              <div className='flex items-center gap-2 text-blue-700 font-medium'>
+                <ShieldCheck size={14} /> Razorpay UPI & Cards Accepted
+              </div>
+              <div className='flex items-center gap-2 text-gray-500'>
+                <Truck size={14} /> Free delivery all over India
+              </div>
+            </div>
           </div>
         </div>
       </div>
