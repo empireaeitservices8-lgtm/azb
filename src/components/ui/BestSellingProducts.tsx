@@ -219,6 +219,17 @@ export default function BestSellingProducts() {
                   />
                 </Link>
 
+                {/* Stock Status Badge */}
+                {product.soldOut ? (
+                  <span className="absolute top-2.5 left-2.5 bg-red-600 text-white text-[10px] sm:text-xs font-black uppercase tracking-wider px-2 py-0.5 rounded-md shadow-xs z-10">
+                    Out of Stock
+                  </span>
+                ) : (
+                  <span className="absolute top-2.5 left-2.5 bg-emerald-600 text-white text-[10px] sm:text-xs font-black uppercase tracking-wider px-2 py-0.5 rounded-md shadow-xs z-10">
+                    In Stock
+                  </span>
+                )}
+
                 {/* Wishlist Button */}
                 <button 
                   onClick={() => isInWishlist(Number(product.id)) ? removeFromWishlist(Number(product.id)) : addToWishlist(product as unknown as Product)}
@@ -322,6 +333,17 @@ export default function BestSellingProducts() {
                         }}
                       />
                     </Link>
+
+                    {/* Stock Status Badge */}
+                    {product.soldOut ? (
+                      <span className="absolute top-1.5 left-1.5 bg-red-600 text-white text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-md shadow-xs z-10">
+                        Out of Stock
+                      </span>
+                    ) : (
+                      <span className="absolute top-1.5 left-1.5 bg-emerald-600 text-white text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-md shadow-xs z-10">
+                        In Stock
+                      </span>
+                    )}
                     
                     {/* Wishlist Button */}
                     <button 

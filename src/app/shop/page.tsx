@@ -227,6 +227,17 @@ function ShopContent() {
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 mix-blend-multiply"
                     />
                   </Link>
+
+                  {/* Stock Status Badge */}
+                  {product.soldOut ? (
+                    <span className="absolute top-2 left-2 bg-red-600 text-white font-black text-[9px] sm:text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-md shadow-xs z-10">
+                      Out of Stock
+                    </span>
+                  ) : (
+                    <span className="absolute top-2 left-2 bg-emerald-600 text-white font-black text-[9px] sm:text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-md shadow-xs z-10">
+                      In Stock
+                    </span>
+                  )}
                   <button 
                     onClick={() => isInWishlist(product.id) ? removeFromWishlist(product.id) : addToWishlist(product)}
                     className={`absolute top-2 right-2 backdrop-blur-xs p-1.5 rounded-full transition-colors shadow-xs ${

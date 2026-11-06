@@ -200,9 +200,20 @@ export default function ProductDetailsClient({ id }: ProductDetailsClientProps) 
                   }}
                 />
 
+                {/* Stock Status Badge */}
+                {product.soldOut ? (
+                  <span className="absolute top-4 left-4 bg-red-600 text-white font-extrabold text-xs sm:text-sm px-3 py-1 rounded-full shadow-md tracking-wider uppercase z-10">
+                    Out of Stock
+                  </span>
+                ) : (
+                  <span className="absolute top-4 left-4 bg-emerald-600 text-white font-extrabold text-xs sm:text-sm px-3 py-1 rounded-full shadow-md tracking-wider uppercase z-10">
+                    In Stock
+                  </span>
+                )}
+
                 {/* Discount Badge */}
-                {product.discount && (
-                  <span className="absolute top-4 left-4 bg-red-600 text-white font-extrabold text-xs sm:text-sm px-3 py-1 rounded-full shadow-md tracking-wide">
+                {product.discount && !product.soldOut && (
+                  <span className="absolute top-14 left-4 bg-yellow-400 text-black font-extrabold text-xs sm:text-sm px-3 py-1 rounded-full shadow-md tracking-wide z-10">
                     {product.discount}
                   </span>
                 )}

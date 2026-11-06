@@ -134,3 +134,55 @@ export async function GET() {
     });
   }
 }
+
+export async function PUT(req: Request) {
+  try {
+    const body = await req.json();
+    const { productId, inStock, stock_status } = body;
+
+    if (!productId) {
+      return NextResponse.json(
+        { success: false, message: 'Product ID is required.' },
+        { status: 400 }
+      );
+    }
+
+    const finalStockStatus = stock_status || (inStock === false ? 'outofstock' : 'instock');
+
+    const STORE_URL = process.env.NEXT_PUBLIC_WC_STORE_URL || process.env.NEXT_PUBLIC_WORDPRESS_URL || 'https://lightcyan-gorilla-655722.hostingersite.com';
+    const CONSUMER_KEY = process.env.WC_CONSUMER_KEY || 'ck_e497e69c0680d9054f73f8b36238746212d1fe2c';
+    const CONSUMER_SECRET = process.env.WC_CONSUMER_SECRET || 'cs_9bb054c8d61c59efce9e1c637c2f344d9ba6bd7e';
+    const authQuery = `consumer_key=${CONSUMER_KEY}&consumer_secret=${CONSUMER_SECRET}`;
+
+    const res = await fetch(`${STORE_URL}/wp-json/wc/v3/products/${productId}?${authQuery}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ stock_status: finalStockStatus }),
+      cache: 'no-store'
+    });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      console.error('Failed to update product in WooCommerce:', errText);
+      return NextResponse.json(
+        { success: false, message: 'Failed to update stock status in WooCommerce.' },
+        { status: 500 }
+      );
+    }
+
+    const updatedWc = await res.json();
+    return NextResponse.json({
+      success: true,
+      message: `Stock status updated to ${finalStockStatus === 'instock' ? 'In Stock' : 'Out of Stock'}!`,
+      productId,
+      stock_status: updatedWc.stock_status,
+      soldOut: updatedWc.stock_status === 'outofstock'
+    });
+  } catch (err) {
+    console.error('Error updating stock status:', err);
+    return NextResponse.json(
+      { success: false, message: 'Server error updating stock status.' },
+      { status: 500 }
+    );
+  }
+}
