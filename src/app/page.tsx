@@ -19,11 +19,11 @@ export default function Home() {
       {/* Best Selling Products */}
       <BestSellingProducts />
 
-      {/* All Products */}
-      <AllProducts />
-
       {/* Shop By Category */}
       <ShopByCategory />
+
+      {/* All Products */}
+      <AllProducts />
 
       {/* Top Picks */}
       <TopPicks />

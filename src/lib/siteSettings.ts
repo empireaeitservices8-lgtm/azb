@@ -13,6 +13,7 @@ export interface InstagramReel {
   id: number;
   productId?: number;
   title: string;
+  description?: string;
   category: string;
   price: number;
   originalPrice: number;
@@ -169,20 +170,21 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   reels: [
     {
       id: 101,
-      productId: 23,
-      title: 'Neon 4-in-1 Car Charger Advertisement',
-      category: 'Electronics',
-      price: 999,
-      originalPrice: 1050,
-      discount: '5% Off',
+      title: 'OMR Answer Sheet Book',
+      description: 'Essential practice workbook for competitive exams & Kerala PSC',
+      category: 'Books & Stationery',
+      price: 199,
+      originalPrice: 299,
+      discount: '33% Off',
       videoSrc: '/videos/reel1.mp4',
-      poster: 'https://lightcyan-gorilla-655722.hostingersite.com/wp-content/uploads/2026/10/Neon-4-in-1-Car-Charger-Advertisement.png',
+      poster: '/images/product-placeholder.svg',
       instagramUrl: 'https://www.instagram.com/'
     },
     {
       id: 102,
       productId: 14,
       title: 'Stacked Black Shoe Shine Wipes',
+      description: 'Instant clean & shine for sneakers and leather boots',
       category: 'Shoe Care',
       price: 180,
       originalPrice: 249,
@@ -195,6 +197,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
       id: 103,
       productId: 12,
       title: '7 in 1 Laundry Pod (20 Pods Cleaning Power)',
+      description: 'Concentrated 7-in-1 detergent pod with deep cleaning & long-lasting fragrance',
       category: 'Home Essentials, Laundry',
       price: 200,
       originalPrice: 399,
@@ -205,14 +208,14 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
     },
     {
       id: 104,
-      productId: 21,
-      title: 'Drone E88 Dual-Camera Store Showcase',
-      category: 'Electronics',
-      price: 1399,
-      originalPrice: 1500,
-      discount: '7% Off',
+      title: 'Customized Memory Book',
+      description: 'Personalized memory photo album & keepsake gift',
+      category: 'Personalized Gifts',
+      price: 499,
+      originalPrice: 899,
+      discount: '44% Off',
       videoSrc: '/videos/reel4.mp4',
-      poster: 'https://lightcyan-gorilla-655722.hostingersite.com/wp-content/uploads/2026/10/Drone-E88-Dual-Camera-Store-Showcase.png',
+      poster: '/images/product-placeholder.svg',
       instagramUrl: 'https://www.instagram.com/'
     }
   ],
@@ -333,6 +336,7 @@ export function parseACFToSiteSettings(acf: Record<string, any>): SiteSettings {
       const price = Number(acf[`reel_${i}_price`]) || defaultReel?.price || 0;
       const originalPrice = Number(acf[`reel_${i}_original_price`]) || defaultReel?.originalPrice || price;
       const discount = acf[`reel_${i}_discount`] || defaultReel?.discount || '';
+      const description = acf[`reel_${i}_description`] || defaultReel?.description || '';
       const instagramUrl = acf[`reel_${i}_instagram_url`] || defaultReel?.instagramUrl || 'https://www.instagram.com/';
       const productLink = acf[`reel_${i}_product_link`] || defaultReel?.productId?.toString() || '';
       
@@ -343,6 +347,7 @@ export function parseACFToSiteSettings(acf: Record<string, any>): SiteSettings {
         id: defaultReel?.id || 100 + i,
         productId,
         title,
+        description,
         category,
         price,
         originalPrice,

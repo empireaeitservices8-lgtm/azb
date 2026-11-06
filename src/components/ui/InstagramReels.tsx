@@ -5,23 +5,24 @@ import { ChevronLeft, ChevronRight, Volume2, VolumeX, ExternalLink } from 'lucid
 import { useSiteSettings } from '@/contexts/SiteSettingsContext';
 import { InstagramReel } from '@/lib/siteSettings';
 
-const DEFAULT_REELS = [
+const DEFAULT_REELS: InstagramReel[] = [
   {
     id: 101,
-    productId: 23,
-    title: "Neon 4-in-1 Car Charger Advertisement",
-    category: "Electronics",
-    price: 999,
-    originalPrice: 1050,
-    discount: "5% Off",
+    title: "OMR Answer Sheet Book",
+    description: "Essential practice workbook for competitive exams & Kerala PSC",
+    category: "Books & Stationery",
+    price: 199,
+    originalPrice: 299,
+    discount: "33% Off",
     videoSrc: "/videos/reel1.mp4",
-    poster: "https://lightcyan-gorilla-655722.hostingersite.com/wp-content/uploads/2026/10/Neon-4-in-1-Car-Charger-Advertisement.png",
+    poster: "/images/product-placeholder.svg",
     instagramUrl: "https://www.instagram.com/"
   },
   {
     id: 102,
     productId: 14,
     title: "Stacked Black Shoe Shine Wipes",
+    description: "Instant clean & shine for sneakers and leather boots",
     category: "Shoe Care",
     price: 180,
     originalPrice: 249,
@@ -34,6 +35,7 @@ const DEFAULT_REELS = [
     id: 103,
     productId: 12,
     title: "7 in 1 Laundry Pod (20 Pods Cleaning Power)",
+    description: "Concentrated 7-in-1 detergent pod with deep cleaning & long-lasting fragrance",
     category: "Home Essentials, Laundry",
     price: 200,
     originalPrice: 399,
@@ -44,14 +46,14 @@ const DEFAULT_REELS = [
   },
   {
     id: 104,
-    productId: 21,
-    title: "Drone E88 Dual-Camera Store Showcase",
-    category: "Electronics",
-    price: 1399,
-    originalPrice: 1500,
-    discount: "7% Off",
+    title: "Customized Memory Book",
+    description: "Personalized memory photo album & keepsake gift",
+    category: "Personalized Gifts",
+    price: 499,
+    originalPrice: 899,
+    discount: "44% Off",
     videoSrc: "/videos/reel4.mp4",
-    poster: "https://lightcyan-gorilla-655722.hostingersite.com/wp-content/uploads/2026/10/Drone-E88-Dual-Camera-Store-Showcase.png",
+    poster: "/images/product-placeholder.svg",
     instagramUrl: "https://www.instagram.com/"
   }
 ];
@@ -205,16 +207,23 @@ export default function InstagramReels() {
             <div className="p-3 sm:p-4 flex flex-col flex-1 bg-white">
               {/* Product Title */}
               <Link href={`/product/${reel.productId || reel.id}`} className="hover:text-yellow-600 transition-colors">
-                <h3 className="font-bold text-xs sm:text-sm text-gray-900 line-clamp-2 leading-snug min-h-[32px] sm:min-h-[40px]">
+                <h3 className="font-bold text-xs sm:text-sm text-gray-900 line-clamp-2 leading-snug">
                   {reel.title}
                 </h3>
               </Link>
               
               {/* Category */}
-              {reel.category && <p className="text-[11px] sm:text-xs text-gray-500 mt-0.5">{reel.category}</p>}
+              {reel.category && <p className="text-[11px] sm:text-xs text-gray-400 mt-0.5">{reel.category}</p>}
+
+              {/* Description */}
+              {reel.description && (
+                <p className="text-[11px] sm:text-xs text-gray-600 mt-1 line-clamp-2 leading-snug">
+                  {reel.description}
+                </p>
+              )}
               
               {/* Rate (Price, Original Price, Discount) */}
-              <div className="mt-2 flex items-baseline gap-1.5 sm:gap-2 flex-wrap">
+              <div className="mt-2.5 flex items-baseline gap-1.5 sm:gap-2 flex-wrap">
                 <span className="text-base sm:text-lg font-extrabold text-gray-900">₹{reel.price}</span>
                 {reel.originalPrice > reel.price && (
                   <span className="text-xs text-gray-400 line-through">₹{reel.originalPrice}</span>
@@ -222,16 +231,6 @@ export default function InstagramReels() {
                 {reel.discount && (
                   <span className="text-xs font-bold text-red-500">({reel.discount})</span>
                 )}
-              </div>
-
-              {/* Buy Now CTA */}
-              <div className="mt-3 pt-2.5 border-t border-gray-100">
-                <Link
-                  href={`/product/${reel.productId || reel.id}`}
-                  className="w-full block bg-yellow-400 hover:bg-yellow-500 text-black text-center py-1.5 px-3 rounded-lg text-xs font-bold transition-colors cursor-pointer shadow-2xs"
-                >
-                  Buy Now
-                </Link>
               </div>
             </div>
           </div>

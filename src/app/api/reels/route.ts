@@ -103,7 +103,7 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { title, videoSrc, poster, price, originalPrice, discount, instagramUrl, productId, category } = body;
+    const { title, description, videoSrc, poster, price, originalPrice, discount, instagramUrl, productId, category } = body;
 
     if (!title || !videoSrc) {
       return NextResponse.json(
@@ -119,6 +119,7 @@ export async function POST(req: Request) {
       id: newId,
       productId: productId ? Number(productId) : undefined,
       title: title.trim(),
+      description: description?.trim() || '',
       category: category?.trim() || 'General',
       price: Number(price) || 0,
       originalPrice: Number(originalPrice) || Number(price) || 0,
@@ -152,7 +153,7 @@ export async function POST(req: Request) {
 export async function PUT(req: Request) {
   try {
     const body = await req.json();
-    const { id, title, videoSrc, poster, price, originalPrice, discount, instagramUrl, productId, category } = body;
+    const { id, title, description, videoSrc, poster, price, originalPrice, discount, instagramUrl, productId, category } = body;
 
     if (!id) {
       return NextResponse.json(
@@ -167,6 +168,7 @@ export async function PUT(req: Request) {
         return {
           ...r,
           title: title !== undefined ? title.trim() : r.title,
+          description: description !== undefined ? description.trim() : r.description,
           videoSrc: videoSrc !== undefined ? videoSrc.trim() : r.videoSrc,
           poster: poster !== undefined ? poster.trim() : r.poster,
           category: category !== undefined ? category.trim() : r.category,

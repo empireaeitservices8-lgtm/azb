@@ -29,6 +29,7 @@ export default function AdminPage() {
   // Form Fields
   const [formData, setFormData] = useState({
     title: '',
+    description: '',
     productId: '',
     category: '',
     price: '',
@@ -101,6 +102,7 @@ export default function AdminPage() {
     setEditingReel(null);
     setFormData({
       title: '',
+      description: '',
       productId: '',
       category: '',
       price: '',
@@ -118,6 +120,7 @@ export default function AdminPage() {
     setEditingReel(reel);
     setFormData({
       title: reel.title || '',
+      description: reel.description || '',
       productId: reel.productId?.toString() || '',
       category: reel.category || '',
       price: reel.price?.toString() || '',
@@ -439,9 +442,15 @@ export default function AdminPage() {
                   <span className="text-[10px] uppercase font-bold tracking-wider text-gray-400">
                     {reel.category || 'General'}
                   </span>
-                  <h3 className="font-bold text-sm text-gray-900 line-clamp-2 mt-0.5 min-h-[40px]">
+                  <h3 className="font-bold text-sm text-gray-900 line-clamp-2 mt-0.5">
                     {reel.title}
                   </h3>
+
+                  {reel.description && (
+                    <p className="text-xs text-gray-500 line-clamp-2 mt-1">
+                      {reel.description}
+                    </p>
+                  )}
 
                   <div className="mt-2 flex items-baseline gap-1.5">
                     <span className="text-base font-extrabold text-gray-900">₹{reel.price}</span>
@@ -555,10 +564,24 @@ export default function AdminPage() {
                 />
               </div>
 
+              {/* Description */}
+              <div>
+                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                  3. Description / Product Highlights (Optional)
+                </label>
+                <textarea
+                  rows={2}
+                  placeholder="Short description of the product shown in the reel"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  className="w-full px-3 py-2 rounded-xl border border-gray-300 text-xs sm:text-sm focus:ring-2 focus:ring-yellow-400 outline-none resize-none"
+                />
+              </div>
+
               {/* Video URL */}
               <div>
                 <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
-                  3. Video MP4 URL *
+                  4. Video MP4 URL *
                 </label>
                 <input
                   type="text"

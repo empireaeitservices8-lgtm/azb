@@ -65,31 +65,35 @@ export default function AllProducts() {
     load();
   }, []);
 
-  // Group items into pairs of exactly 2 items for Mobile view
-  const pairs: ProductItem[][] = [];
-  for (let i = 0; i < items.length; i += 2) {
-    if (items[i + 1]) {
-      pairs.push([items[i], items[i + 1]]);
-    } else {
-      pairs.push([items[i], items[0]]);
+  // Group items into groups of 4 items for Mobile view (2x2 grid displaying 4 images on phone)
+  const mobileGroups: ProductItem[][] = [];
+  if (items.length > 0) {
+    for (let i = 0; i < items.length; i += 4) {
+      const chunk = items.slice(i, i + 4);
+      if (chunk.length < 4 && items.length >= 4) {
+        chunk.push(...items.slice(0, 4 - chunk.length));
+      }
+      mobileGroups.push(chunk);
     }
   }
 
-  const totalPairs = pairs.length;
-  const displayPairs = totalPairs > 0 ? [...pairs, pairs[0]] : [];
+  const totalSlides = mobileGroups.length;
+  const displayGroups = totalSlides > 1 ? [...mobileGroups, mobileGroups[0]] : mobileGroups;
 
   const nextSlide = () => {
+    if (totalSlides <= 1) return;
     setIsTransitioning(true);
     setCurrentSlide((prev) => prev + 1);
   };
 
   const prevSlide = () => {
+    if (totalSlides <= 1) return;
     setIsTransitioning(true);
-    setCurrentSlide((prev) => (prev === 0 ? totalPairs - 1 : prev - 1));
+    setCurrentSlide((prev) => (prev === 0 ? totalSlides - 1 : prev - 1));
   };
 
   const handleTransitionEnd = () => {
-    if (currentSlide >= totalPairs) {
+    if (currentSlide >= totalSlides) {
       setIsTransitioning(false);
       setCurrentSlide(0);
     }
@@ -99,14 +103,14 @@ export default function AllProducts() {
   useEffect(() => {
     const timer = setInterval(() => {
       if (typeof window !== 'undefined' && window.innerWidth < 768) {
-        if (totalPairs > 0) nextSlide();
+        if (totalSlides > 1) nextSlide();
       } else {
         scrollDesktop('next');
       }
     }, 7000);
 
     return () => clearInterval(timer);
-  }, [totalPairs]);
+  }, [totalSlides]);
 
   // Touch Handlers for Mobile swipe
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -282,7 +286,7 @@ export default function AllProducts() {
         </div>
       </div>
 
-      {/* 2. Mobile View (2 Products at a time with swipe & touch gestures) */}
+      {/* 2. Mobile View (4 Products at a time in 2x2 grid with swipe & touch gestures) */}
       <div 
         className="block md:hidden w-full overflow-hidden rounded-xl"
         onTouchStart={handleTouchStart}
@@ -293,18 +297,18 @@ export default function AllProducts() {
           style={{ transform: `translateX(-${currentSlide * 100}%)` }}
           onTransitionEnd={handleTransitionEnd}
         >
-          {displayPairs.map((pair, slideIdx) => (
+          {displayGroups.map((group, slideIdx) => (
             <div 
               key={slideIdx} 
-              className="w-full min-w-full flex-none grid grid-cols-2 gap-3 p-1"
+              className="w-full min-w-full flex-none grid grid-cols-2 gap-2 sm:gap-2.5 p-0.5"
             >
-              {pair.map((product, pIdx) => (
+              {group.map((product, pIdx) => (
                 <div 
                   key={`${product.id}-${slideIdx}-${pIdx}`} 
-                  className="flex flex-col bg-white rounded-xl border border-gray-100 p-2.5 shadow-2xs group"
+                  className="flex flex-col bg-white rounded-xl border border-gray-100 p-2 shadow-2xs group"
                 >
                   {/* Image Box */}
-                  <div className="relative aspect-square w-full bg-gray-50 rounded-lg overflow-hidden mb-2">
+                  <div className="relative aspect-square w-full bg-gray-50 rounded-lg overflow-hidden mb-1.5">
                     <Link href={`/product/${product.id}`} className="block w-full h-full">
                       <img 
                         src={product.image} 
@@ -321,42 +325,42 @@ export default function AllProducts() {
                     {/* Wishlist Button */}
                     <button 
                       onClick={() => isInWishlist(Number(product.id)) ? removeFromWishlist(Number(product.id)) : addToWishlist(product as unknown as Product)}
-                      className={`absolute top-1.5 right-1.5 p-1.5 rounded-lg backdrop-blur-xs shadow-xs transition-all z-10 cursor-pointer ${
+                      className={`absolute top-1 right-1 p-1 rounded-md backdrop-blur-xs shadow-xs transition-all z-10 cursor-pointer ${
                         isInWishlist(Number(product.id)) 
                           ? 'bg-red-50 text-red-500 ring-1 ring-red-300' 
                           : 'bg-white/95 text-gray-400 hover:text-red-500'
                       }`}
                       aria-label="Wishlist"
                     >
-                      <Heart size={14} fill={isInWishlist(Number(product.id)) ? "currentColor" : "none"} />
+                      <Heart size={12} fill={isInWishlist(Number(product.id)) ? "currentColor" : "none"} />
                     </button>
                   </div>
                   
                   {/* Details */}
                   <div className="flex flex-col flex-1">
                     <Link href={`/product/${product.id}`}>
-                      <h3 className="font-bold text-xs text-gray-900 line-clamp-1 leading-snug">
+                      <h3 className="font-bold text-[11px] text-gray-900 line-clamp-1 leading-snug">
                         {product.title}
                       </h3>
                     </Link>
-                    <p className="text-[11px] text-gray-400 mt-0.5">{product.category}</p>
+                    <p className="text-[10px] text-gray-400 mt-0.5">{product.category}</p>
                     
                     <div className="mt-1 flex items-baseline gap-1 flex-wrap">
-                      <span className="text-sm font-bold text-gray-900">₹{product.price}</span>
+                      <span className="text-xs sm:text-sm font-bold text-gray-900">₹{product.price}</span>
                       {product.originalPrice && product.originalPrice > product.price && (
-                        <span className="text-[11px] text-gray-400 line-through">₹{product.originalPrice}</span>
+                        <span className="text-[10px] text-gray-400 line-through">₹{product.originalPrice}</span>
                       )}
                       {product.discount && (
-                        <span className="text-[10px] font-bold text-red-500">({product.discount})</span>
+                        <span className="text-[9px] font-bold text-red-500">({product.discount})</span>
                       )}
                     </div>
                     
                     {/* Action Buttons: Add to Cart & Buy Now */}
-                    <div className="mt-2.5 mt-auto flex flex-col gap-1.5">
+                    <div className="mt-2 mt-auto flex items-center gap-1">
                       {product.soldOut ? (
                         <button 
                           disabled
-                          className="w-full bg-[#1e2d3d] text-white py-1.5 px-2 rounded-lg text-xs font-semibold opacity-85 cursor-not-allowed text-center"
+                          className="w-full bg-[#1e2d3d] text-white py-1 px-1.5 rounded-md text-[10px] font-semibold opacity-85 cursor-not-allowed text-center"
                         >
                           Sold Out
                         </button>
@@ -364,15 +368,15 @@ export default function AllProducts() {
                         <>
                           <button 
                             onClick={() => addToCart(product as unknown as Product)}
-                            className="w-full bg-[#1e2d3d] hover:bg-[#15202b] text-white py-1 px-2 rounded-lg text-[11px] font-semibold transition-colors cursor-pointer text-center"
+                            className="flex-1 bg-[#1e2d3d] hover:bg-[#15202b] text-white py-1 px-1 rounded-md text-[10px] font-semibold transition-colors cursor-pointer text-center"
                           >
-                            Add to Cart
+                            Add
                           </button>
                           <button 
                             onClick={() => handleBuyNow(product)}
-                            className="w-full bg-yellow-400 hover:bg-yellow-500 text-black py-1 px-2 rounded-lg text-[11px] font-bold transition-colors cursor-pointer text-center shadow-2xs"
+                            className="flex-1 bg-yellow-400 hover:bg-yellow-500 text-black py-1 px-1 rounded-md text-[10px] font-bold transition-colors cursor-pointer text-center shadow-2xs"
                           >
-                            Buy Now
+                            Buy
                           </button>
                         </>
                       )}
