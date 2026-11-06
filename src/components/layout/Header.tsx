@@ -5,11 +5,13 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Search, User, Heart, ShoppingCart, MapPin, Menu, X, Navigation, Phone, Mail, ChevronRight, ArrowRight } from 'lucide-react';
 import { searchProducts, Product } from '@/data/products';
 import { useCart } from '@/contexts/CartContext';
+import { useSiteSettings } from '@/contexts/SiteSettingsContext';
 
 export default function Header() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { totalItems } = useCart();
+  const { settings } = useSiteSettings();
   const [isMounted, setIsMounted] = useState(false);
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -172,7 +174,7 @@ export default function Header() {
 
             <Link href="/" className="flex-shrink-0 flex items-center">
               <img 
-                src="/images/logo.png" 
+                src={settings.site_logo || "/images/logo.png"} 
                 alt="AZB Store Logo" 
                 className="h-10 sm:h-12 md:h-16 w-auto drop-shadow-md object-contain"
               />
@@ -470,7 +472,7 @@ export default function Header() {
             <div className="bg-black text-white p-4 flex items-center justify-between border-b border-gray-800">
               <Link href="/" onClick={() => setIsMobileMenuOpen(false)}>
                 <img 
-                  src="/images/logo.png" 
+                  src={settings.site_logo || "/images/logo.png"} 
                   alt="AZB Store Logo" 
                   className="h-10 w-auto object-contain"
                 />
@@ -617,9 +619,9 @@ export default function Header() {
                   <Phone size={14} />
                 </div>
                 <div>
-                  <p className="text-[11px] text-gray-500">Need help? Call 24/7</p>
-                  <a href="tel:+919072525292" className="text-xs font-bold text-gray-900">
-                    +91 9072525292
+                  <p className="text-[11px] text-gray-500">{settings.site_phone_label || "Need help? Call 24/7"}</p>
+                  <a href={`tel:${settings.site_phone}`} className="text-xs font-bold text-gray-900">
+                    {settings.site_phone}
                   </a>
                 </div>
               </div>
@@ -628,9 +630,9 @@ export default function Header() {
                   <Mail size={14} />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[11px] text-gray-500">Email us</p>
-                  <a href="mailto:azbstoreofficial@gmail.com" className="text-xs font-bold text-gray-900 truncate block">
-                    azbstoreofficial@gmail.com
+                  <p className="text-[11px] text-gray-500">{settings.site_email_label || "Email us"}</p>
+                  <a href={`mailto:${settings.site_email}`} className="text-xs font-bold text-gray-900 truncate block">
+                    {settings.site_email}
                   </a>
                 </div>
               </div>

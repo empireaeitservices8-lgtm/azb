@@ -6,6 +6,7 @@ import { Heart, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { Product } from '@/data/products';
+import { useSiteSettings } from '@/contexts/SiteSettingsContext';
 
 interface BestSellingProductItem {
   id: number;
@@ -20,6 +21,7 @@ interface BestSellingProductItem {
 
 export default function BestSellingProducts() {
   const router = useRouter();
+  const { settings } = useSiteSettings();
   const [items, setItems] = useState<BestSellingProductItem[]>([]);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(true);
@@ -169,7 +171,7 @@ export default function BestSellingProducts() {
       <div className="flex items-center justify-between mb-5 sm:mb-6">
         <div>
           <h2 className="text-xl sm:text-2xl font-extrabold text-gray-900 uppercase tracking-wide">
-            BEST SELLING PRODUCTS
+            {settings.heading_bestsellers_title || 'BEST SELLING PRODUCTS'}
           </h2>
         </div>
         {/* Navigation circular arrows */}

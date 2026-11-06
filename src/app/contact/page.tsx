@@ -1,13 +1,26 @@
 import React from 'react';
 import Link from 'next/link';
 import { MapPin, Phone, Mail, Clock, Send } from 'lucide-react';
+import { fetchLiveSiteSettings } from '@/lib/siteSettings';
 
 export const metadata = {
   title: 'Contact Us - AZB Store',
   description: 'Get in touch with AZB Store for any inquiries, support, or feedback.',
 };
 
-export default function ContactPage() {
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+export default async function ContactPage() {
+  const settings = await fetchLiveSiteSettings();
+
+  const title = settings.contact_title || 'Get In Touch';
+  const subtitle = settings.contact_subtitle || 'Have a question about our products, your order, or just want to say hi? We\'re always here to help. Drop us a message below!';
+  const phone = settings.site_phone || '+91 9072525292';
+  const email = settings.site_email || 'azbstoreofficial@gmail.com';
+  const hours = settings.contact_hours_text || settings.site_hours || 'Mon-Fri: 9:00 AM - 6:00 PM';
+  const addressLines = (settings.contact_address_text || 'AZB Store\nKarunagappally\nKollam').split('\n');
+
   return (
     <main className="min-h-screen bg-gray-50 pb-20">
       {/* Breadcrumb Header */}
@@ -23,9 +36,9 @@ export default function ContactPage() {
 
       <div className="container mx-auto px-4 md:px-8 pt-12">
         <div className="text-center max-w-2xl mx-auto mb-16">
-          <h1 className="text-4xl md:text-5xl font-extrabold text-black mb-4">Get In Touch</h1>
+          <h1 className="text-4xl md:text-5xl font-extrabold text-black mb-4">{title}</h1>
           <p className="text-gray-600 text-lg">
-            Have a question about our products, your order, or just want to say hi? We're always here to help. Drop us a message below!
+            {subtitle}
           </p>
         </div>
 
@@ -40,9 +53,9 @@ export default function ContactPage() {
                 <Phone size={28} />
               </div>
               <h3 className="text-xl font-bold text-black mb-2">Call Us</h3>
-              <p className="text-gray-500 mb-4 text-sm">We are available 24/7 to answer your queries.</p>
-              <a href="tel:+919072525292" className="text-lg font-bold text-yellow-600 hover:text-yellow-500 transition-colors">
-                +91 9072525292
+              <p className="text-gray-500 mb-4 text-sm">{settings.site_phone_label || 'We are available 24/7 to answer your queries.'}</p>
+              <a href={`tel:${phone}`} className="text-lg font-bold text-yellow-600 hover:text-yellow-500 transition-colors">
+                {phone}
               </a>
             </div>
 
@@ -52,9 +65,9 @@ export default function ContactPage() {
                 <Mail size={28} />
               </div>
               <h3 className="text-xl font-bold text-black mb-2">Email Us</h3>
-              <p className="text-gray-500 mb-4 text-sm">Send us an email and we'll reply within 24 hours.</p>
-              <a href="mailto:azbstoreofficial@gmail.com" className="text-lg font-bold text-yellow-600 hover:text-yellow-500 transition-colors">
-                azbstoreofficial@gmail.com
+              <p className="text-gray-500 mb-4 text-sm">{settings.site_email_label || 'Send us an email and we\'ll reply within 24 hours.'}</p>
+              <a href={`mailto:${email}`} className="text-lg font-bold text-yellow-600 hover:text-yellow-500 transition-colors">
+                {email}
               </a>
             </div>
 
@@ -64,14 +77,14 @@ export default function ContactPage() {
                 <MapPin size={28} />
               </div>
               <h3 className="text-xl font-bold text-white mb-2">Our Headquarters</h3>
-              <p className="text-gray-400 mb-4 text-sm leading-relaxed">
-                AZB Store<br/>
-                Karunagappally<br/>
-                Kollam
-              </p>
+              <div className="text-gray-400 mb-4 text-sm leading-relaxed">
+                {addressLines.map((line, idx) => (
+                  <p key={idx}>{line}</p>
+                ))}
+              </div>
               <div className="flex items-center justify-center gap-2 text-yellow-500 text-sm font-medium mt-2">
                 <Clock size={16} />
-                <span>Mon-Fri: 9:00 AM - 6:00 PM</span>
+                <span>{hours}</span>
               </div>
             </div>
 
@@ -152,7 +165,7 @@ export default function ContactPage() {
 
                 <button 
                   type="button" 
-                  className="w-full bg-yellow-500 hover:bg-yellow-400 text-black font-bold text-lg py-4 rounded-lg flex items-center justify-center gap-2 transition-colors"
+                  className="w-full bg-yellow-500 hover:bg-yellow-400 text-black font-bold text-lg py-4 rounded-lg flex items-center justify-center gap-2 transition-colors cursor-pointer"
                 >
                   <span>Send Message</span>
                   <Send size={20} />

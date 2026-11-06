@@ -3,12 +3,17 @@ import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { hostingerCategories, CategoryItem } from '@/data/categories';
+import { useSiteSettings } from '@/contexts/SiteSettingsContext';
 export type { CategoryItem };
 export { hostingerCategories };
 
 export default function ShopByCategory() {
+  const { settings } = useSiteSettings();
   const [categories, setCategories] = useState<CategoryItem[]>(hostingerCategories);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const title = settings.heading_categories_title || 'SHOP BY CATEGORY';
+  const subtitle = settings.heading_categories_subtitle || 'Explore all official categories curated for you';
 
   // Sync category images uploaded to Hostinger
   useEffect(() => {
@@ -40,11 +45,10 @@ export default function ShopByCategory() {
       {/* Title with Scroll Controls */}
       <div className="flex items-center justify-between mb-6 md:mb-8">
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold uppercase tracking-wide">
-            <span className="text-gray-800">SHOP BY</span>{' '}
-            <span className="text-black">CATEGORY</span>
+          <h2 className="text-xl sm:text-2xl font-bold uppercase tracking-wide text-gray-900">
+            {title}
           </h2>
-          <p className="text-xs text-gray-500 mt-1">Explore all official categories curated for you</p>
+          <p className="text-xs text-gray-500 mt-1">{subtitle}</p>
         </div>
 
         {/* Scroll Arrows */}

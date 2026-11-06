@@ -1,6 +1,7 @@
 import React from 'react';
 import HeroSlider from '@/components/ui/HeroSlider';
 import BestSellingProducts from '@/components/ui/BestSellingProducts';
+import AllProducts from '@/components/ui/AllProducts';
 import ShopByCategory from '@/components/ui/ShopByCategory';
 import TopPicks from '@/components/ui/TopPicks';
 import OutfitsForKids from '@/components/ui/OutfitsForKids';
@@ -17,6 +18,9 @@ export default function Home() {
       
       {/* Best Selling Products */}
       <BestSellingProducts />
+
+      {/* All Products */}
+      <AllProducts />
 
       {/* Shop By Category */}
       <ShopByCategory />

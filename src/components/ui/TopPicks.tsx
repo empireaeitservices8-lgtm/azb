@@ -6,9 +6,11 @@ import { Heart, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { Product } from '@/data/products';
+import { useSiteSettings } from '@/contexts/SiteSettingsContext';
 
 export default function TopPicks() {
   const router = useRouter();
+  const { settings } = useSiteSettings();
   const [items, setItems] = useState<any[]>([]);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(true);
@@ -155,7 +157,7 @@ export default function TopPicks() {
       <div className="flex items-center justify-between mb-5 sm:mb-6">
         <div>
           <h2 className="text-xl sm:text-2xl font-extrabold text-gray-900 uppercase tracking-wide">
-            TOP PICKS
+            {settings.heading_toppicks_title || 'TOP PICKS'}
           </h2>
         </div>
         {/* Navigation circular arrows */}

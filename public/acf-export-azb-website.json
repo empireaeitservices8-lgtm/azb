@@ -1,0 +1,1035 @@
+[
+  {
+    "key": "group_azb_website_content",
+    "title": "AZB Store - Website Content & Image Manager",
+    "fields": [
+      {
+        "key": "field_tab_ribbon",
+        "label": "📢 Announcement Bar",
+        "name": "",
+        "type": "tab",
+        "instructions": "",
+        "required": 0,
+        "conditional_logic": 0,
+        "placement": "top",
+        "endpoint": 0
+      },
+      {
+        "key": "field_ribbon_enabled",
+        "label": "Enable Announcement Bar",
+        "name": "ribbon_enabled",
+        "type": "true_false",
+        "instructions": "Show or hide the top announcement ribbon bar on the website",
+        "required": 0,
+        "conditional_logic": 0,
+        "default_value": 1,
+        "ui": 1,
+        "ui_on_text": "Enabled",
+        "ui_off_text": "Disabled"
+      },
+      {
+        "key": "field_ribbon_notice_1",
+        "label": "Notice Message 1",
+        "name": "ribbon_notice_1",
+        "type": "text",
+        "instructions": "First rotating notice message in the top ribbon",
+        "required": 0,
+        "default_value": "📦 Unedited Unboxing Video Must for Damage Claims"
+      },
+      {
+        "key": "field_ribbon_notice_2",
+        "label": "Notice Message 2",
+        "name": "ribbon_notice_2",
+        "type": "text",
+        "instructions": "Second notice message",
+        "required": 0,
+        "default_value": "🚫 Products are non-returnable"
+      },
+      {
+        "key": "field_ribbon_notice_3",
+        "label": "Notice Message 3",
+        "name": "ribbon_notice_3",
+        "type": "text",
+        "instructions": "Third notice message",
+        "required": 0,
+        "default_value": "🚚 All India Free Shipping"
+      },
+      {
+        "key": "field_ribbon_notice_4",
+        "label": "Notice Message 4",
+        "name": "ribbon_notice_4",
+        "type": "text",
+        "instructions": "Fourth notice message",
+        "required": 0,
+        "default_value": "📅 Shipping Days : Wednesday & Saturday"
+      },
+
+      {
+        "key": "field_tab_branding",
+        "label": "🏷️ Brand & Header",
+        "name": "",
+        "type": "tab",
+        "instructions": "",
+        "placement": "top",
+        "endpoint": 0
+      },
+      {
+        "key": "field_site_logo",
+        "label": "Website Logo",
+        "name": "site_logo",
+        "type": "image",
+        "instructions": "Upload the website logo (PNG or SVG recommended, transparent background)",
+        "required": 0,
+        "return_format": "url",
+        "preview_size": "medium",
+        "library": "all"
+      },
+      {
+        "key": "field_site_phone",
+        "label": "Support Phone Number",
+        "name": "site_phone",
+        "type": "text",
+        "instructions": "Customer support phone number (e.g., +91 9072525292)",
+        "required": 0,
+        "default_value": "+91 9072525292"
+      },
+      {
+        "key": "field_site_phone_label",
+        "label": "Phone Subtitle / Label",
+        "name": "site_phone_label",
+        "type": "text",
+        "instructions": "Subtitle shown next to phone number",
+        "required": 0,
+        "default_value": "Have Questions? Call Us 24/7"
+      },
+      {
+        "key": "field_site_email",
+        "label": "Support Email Address",
+        "name": "site_email",
+        "type": "text",
+        "instructions": "Customer support email address",
+        "required": 0,
+        "default_value": "azbstoreofficial@gmail.com"
+      },
+      {
+        "key": "field_site_email_label",
+        "label": "Email Subtitle / Label",
+        "name": "site_email_label",
+        "type": "text",
+        "instructions": "Subtitle shown next to email address",
+        "required": 0,
+        "default_value": "Email Support"
+      },
+      {
+        "key": "field_site_whatsapp",
+        "label": "WhatsApp Number (Digits Only with Country Code)",
+        "name": "site_whatsapp",
+        "type": "text",
+        "instructions": "e.g. 919072525292 for floating WhatsApp button",
+        "required": 0,
+        "default_value": "919072525292"
+      },
+      {
+        "key": "field_site_hours",
+        "label": "Working / Support Hours",
+        "name": "site_hours",
+        "type": "text",
+        "instructions": "e.g. Monday - Friday: 9:00 AM - 6:00 PM",
+        "required": 0,
+        "default_value": "Monday - Friday: 9:00 AM - 6:00 PM"
+      },
+      {
+        "key": "field_site_location_default",
+        "label": "Default Header Location Text",
+        "name": "site_location_default",
+        "type": "text",
+        "instructions": "Default location text shown before customer enters a pincode",
+        "required": 0,
+        "default_value": "Select location"
+      },
+
+      {
+        "key": "field_tab_hero",
+        "label": "🖼️ Hero Banner Slider",
+        "name": "",
+        "type": "tab",
+        "instructions": "",
+        "placement": "top",
+        "endpoint": 0
+      },
+      {
+        "key": "field_hero_slide_1_image",
+        "label": "Slide 1 Image",
+        "name": "hero_slide_1_image",
+        "type": "image",
+        "instructions": "Recommended size: 1920x600px or similar widescreen banner",
+        "required": 0,
+        "return_format": "url",
+        "preview_size": "medium",
+        "library": "all"
+      },
+      {
+        "key": "field_hero_slide_1_title",
+        "label": "Slide 1 Title",
+        "name": "hero_slide_1_title",
+        "type": "text",
+        "instructions": "Slide 1 Alt text / Title",
+        "required": 0,
+        "default_value": "Happy Family Clothing & Toys"
+      },
+      {
+        "key": "field_hero_slide_1_link",
+        "label": "Slide 1 Target Link",
+        "name": "hero_slide_1_link",
+        "type": "text",
+        "instructions": "Target URL when user clicks Slide 1 (e.g., /shop or full URL)",
+        "required": 0,
+        "default_value": "/shop"
+      },
+      {
+        "key": "field_hero_slide_2_image",
+        "label": "Slide 2 Image",
+        "name": "hero_slide_2_image",
+        "type": "image",
+        "instructions": "Slide 2 banner image",
+        "required": 0,
+        "return_format": "url",
+        "preview_size": "medium",
+        "library": "all"
+      },
+      {
+        "key": "field_hero_slide_2_title",
+        "label": "Slide 2 Title",
+        "name": "hero_slide_2_title",
+        "type": "text",
+        "instructions": "Slide 2 Alt text / Title",
+        "required": 0,
+        "default_value": "Kids Funland Toys & Clothes"
+      },
+      {
+        "key": "field_hero_slide_2_link",
+        "label": "Slide 2 Target Link",
+        "name": "hero_slide_2_link",
+        "type": "text",
+        "instructions": "Target URL for Slide 2",
+        "required": 0,
+        "default_value": "/shop?category=Kids"
+      },
+      {
+        "key": "field_hero_slide_3_image",
+        "label": "Slide 3 Image",
+        "name": "hero_slide_3_image",
+        "type": "image",
+        "instructions": "Slide 3 banner image",
+        "required": 0,
+        "return_format": "url",
+        "preview_size": "medium",
+        "library": "all"
+      },
+      {
+        "key": "field_hero_slide_3_title",
+        "label": "Slide 3 Title",
+        "name": "hero_slide_3_title",
+        "type": "text",
+        "instructions": "Slide 3 Alt text / Title",
+        "required": 0,
+        "default_value": "Exclusive Offers & Gifts"
+      },
+      {
+        "key": "field_hero_slide_3_link",
+        "label": "Slide 3 Target Link",
+        "name": "hero_slide_3_link",
+        "type": "text",
+        "instructions": "Target URL for Slide 3",
+        "required": 0,
+        "default_value": "/shop"
+      },
+      {
+        "key": "field_hero_slide_4_image",
+        "label": "Slide 4 Image (Optional)",
+        "name": "hero_slide_4_image",
+        "type": "image",
+        "instructions": "Optional additional slide",
+        "required": 0,
+        "return_format": "url",
+        "preview_size": "medium",
+        "library": "all"
+      },
+      {
+        "key": "field_hero_slide_4_title",
+        "label": "Slide 4 Title",
+        "name": "hero_slide_4_title",
+        "type": "text",
+        "required": 0
+      },
+      {
+        "key": "field_hero_slide_4_link",
+        "label": "Slide 4 Target Link",
+        "name": "hero_slide_4_link",
+        "type": "text",
+        "required": 0,
+        "default_value": "/shop"
+      },
+      {
+        "key": "field_hero_slide_5_image",
+        "label": "Slide 5 Image (Optional)",
+        "name": "hero_slide_5_image",
+        "type": "image",
+        "instructions": "Optional additional slide",
+        "required": 0,
+        "return_format": "url",
+        "preview_size": "medium",
+        "library": "all"
+      },
+      {
+        "key": "field_hero_slide_5_title",
+        "label": "Slide 5 Title",
+        "name": "hero_slide_5_title",
+        "type": "text",
+        "required": 0
+      },
+      {
+        "key": "field_hero_slide_5_link",
+        "label": "Slide 5 Target Link",
+        "name": "hero_slide_5_link",
+        "type": "text",
+        "required": 0,
+        "default_value": "/shop"
+      },
+
+      {
+        "key": "field_tab_offer_zone",
+        "label": "💥 Offer Zone Banner",
+        "name": "",
+        "type": "tab",
+        "instructions": "",
+        "placement": "top",
+        "endpoint": 0
+      },
+      {
+        "key": "field_offer_zone_heading_prefix",
+        "label": "Offer Zone Heading Prefix",
+        "name": "offer_zone_heading_prefix",
+        "type": "text",
+        "instructions": "First word of heading (default: OFFER)",
+        "required": 0,
+        "default_value": "OFFER"
+      },
+      {
+        "key": "field_offer_zone_heading_highlight",
+        "label": "Offer Zone Heading Highlight",
+        "name": "offer_zone_heading_highlight",
+        "type": "text",
+        "instructions": "Highlighted word of heading (default: ZONE)",
+        "required": 0,
+        "default_value": "ZONE"
+      },
+      {
+        "key": "field_offer_zone_image",
+        "label": "Offer Zone Banner Image",
+        "name": "offer_zone_image",
+        "type": "image",
+        "instructions": "Recommended size: 1200x350px. Replaces /images/offer_banner.jpg",
+        "required": 0,
+        "return_format": "url",
+        "preview_size": "medium",
+        "library": "all"
+      },
+      {
+        "key": "field_offer_zone_link",
+        "label": "Offer Zone Target Link",
+        "name": "offer_zone_link",
+        "type": "text",
+        "instructions": "URL opened when user taps the banner (default: /shop)",
+        "required": 0,
+        "default_value": "/shop"
+      },
+      {
+        "key": "field_offer_zone_alt",
+        "label": "Offer Zone Image Alt Text",
+        "name": "offer_zone_alt",
+        "type": "text",
+        "required": 0,
+        "default_value": "Offer Zone Banner"
+      },
+
+      {
+        "key": "field_tab_features",
+        "label": "⭐ Store Features",
+        "name": "",
+        "type": "tab",
+        "instructions": "",
+        "placement": "top",
+        "endpoint": 0
+      },
+      {
+        "key": "field_feature_1_title",
+        "label": "Feature 1 Title",
+        "name": "feature_1_title",
+        "type": "text",
+        "required": 0,
+        "default_value": "Wide Assortment"
+      },
+      {
+        "key": "field_feature_1_description",
+        "label": "Feature 1 Description",
+        "name": "feature_1_description",
+        "type": "textarea",
+        "rows": 2,
+        "required": 0,
+        "default_value": "Find the perfect fit with our wide range of sizes, colors, and styles."
+      },
+      {
+        "key": "field_feature_2_title",
+        "label": "Feature 2 Title",
+        "name": "feature_2_title",
+        "type": "text",
+        "required": 0,
+        "default_value": "Return Policy For Damaged"
+      },
+      {
+        "key": "field_feature_2_description",
+        "label": "Feature 2 Description",
+        "name": "feature_2_description",
+        "type": "textarea",
+        "rows": 2,
+        "required": 0,
+        "default_value": "Defective or damaged items will be replaced. Unedited unboxing video is must for damage claims."
+      },
+      {
+        "key": "field_feature_3_title",
+        "label": "Feature 3 Title",
+        "name": "feature_3_title",
+        "type": "text",
+        "required": 0,
+        "default_value": "Best Prices & Offers"
+      },
+      {
+        "key": "field_feature_3_description",
+        "label": "Feature 3 Description",
+        "name": "feature_3_description",
+        "type": "textarea",
+        "rows": 2,
+        "required": 0,
+        "default_value": "Save big with exclusive deals and discounts on your favourite products every day."
+      },
+      {
+        "key": "field_feature_4_title",
+        "label": "Feature 4 Title",
+        "name": "feature_4_title",
+        "type": "text",
+        "required": 0,
+        "default_value": "Support 24/7"
+      },
+      {
+        "key": "field_feature_4_description",
+        "label": "Feature 4 Description",
+        "name": "feature_4_description",
+        "type": "textarea",
+        "rows": 2,
+        "required": 0,
+        "default_value": "Get help anytime via chat, call, or email from our friendly support team."
+      },
+
+      {
+        "key": "field_tab_headings",
+        "label": "🏷️ Section Headings",
+        "name": "",
+        "type": "tab",
+        "instructions": "",
+        "placement": "top",
+        "endpoint": 0
+      },
+      {
+        "key": "field_heading_bestsellers_title",
+        "label": "Best Selling Products Section Title",
+        "name": "heading_bestsellers_title",
+        "type": "text",
+        "required": 0,
+        "default_value": "BEST SELLING PRODUCTS"
+      },
+      {
+        "key": "field_heading_categories_title",
+        "label": "Shop By Category Section Title",
+        "name": "heading_categories_title",
+        "type": "text",
+        "required": 0,
+        "default_value": "SHOP BY CATEGORY"
+      },
+      {
+        "key": "field_heading_categories_subtitle",
+        "label": "Shop By Category Section Subtitle",
+        "name": "heading_categories_subtitle",
+        "type": "text",
+        "required": 0,
+        "default_value": "Explore all official categories curated for you"
+      },
+      {
+        "key": "field_heading_toppicks_title",
+        "label": "Top Picks Section Title",
+        "name": "heading_toppicks_title",
+        "type": "text",
+        "required": 0,
+        "default_value": "TOP PICKS"
+      },
+      {
+        "key": "field_heading_outfits_kids_title",
+        "label": "Outfits For Kids Section Title",
+        "name": "heading_outfits_kids_title",
+        "type": "text",
+        "required": 0,
+        "default_value": "OUTFITS FOR KIDS"
+      },
+      {
+        "key": "field_heading_outfits_you_title",
+        "label": "Outfits For You Section Title",
+        "name": "heading_outfits_you_title",
+        "type": "text",
+        "required": 0,
+        "default_value": "OUTFITS FOR YOU"
+      },
+
+      {
+        "key": "field_tab_reels",
+        "label": "📱 Instagram Reels",
+        "name": "",
+        "type": "tab",
+        "instructions": "",
+        "placement": "top",
+        "endpoint": 0
+      },
+      {
+        "key": "field_reels_title",
+        "label": "Reels Section Title",
+        "name": "reels_title",
+        "type": "text",
+        "required": 0,
+        "default_value": "INSTAGRAM REELS"
+      },
+      {
+        "key": "field_reels_subtitle",
+        "label": "Reels Section Subtitle",
+        "name": "reels_subtitle",
+        "type": "text",
+        "required": 0,
+        "default_value": "Watch our latest videos & tap to view on Instagram"
+      },
+
+      {
+        "key": "field_reel_1_title",
+        "label": "Reel 1 - Title",
+        "name": "reel_1_title",
+        "type": "text",
+        "required": 0,
+        "default_value": "Neon 4-in-1 Car Charger Advertisement"
+      },
+      {
+        "key": "field_reel_1_category",
+        "label": "Reel 1 - Category",
+        "name": "reel_1_category",
+        "type": "text",
+        "required": 0,
+        "default_value": "Electronics"
+      },
+      {
+        "key": "field_reel_1_price",
+        "label": "Reel 1 - Price (₹)",
+        "name": "reel_1_price",
+        "type": "number",
+        "required": 0,
+        "default_value": 999
+      },
+      {
+        "key": "field_reel_1_original_price",
+        "label": "Reel 1 - Original Price (₹)",
+        "name": "reel_1_original_price",
+        "type": "number",
+        "required": 0,
+        "default_value": 1050
+      },
+      {
+        "key": "field_reel_1_discount",
+        "label": "Reel 1 - Discount Badge Text",
+        "name": "reel_1_discount",
+        "type": "text",
+        "required": 0,
+        "default_value": "5% Off"
+      },
+      {
+        "key": "field_reel_1_video_url",
+        "label": "Reel 1 - Video MP4 URL",
+        "name": "reel_1_video_url",
+        "type": "text",
+        "instructions": "URL of MP4 video file (e.g. /videos/reel1.mp4 or media upload URL)",
+        "required": 0,
+        "default_value": "/videos/reel1.mp4"
+      },
+      {
+        "key": "field_reel_1_poster",
+        "label": "Reel 1 - Poster / Thumbnail Image",
+        "name": "reel_1_poster",
+        "type": "image",
+        "instructions": "Thumbnail image displayed before video starts",
+        "required": 0,
+        "return_format": "url",
+        "preview_size": "medium",
+        "library": "all"
+      },
+      {
+        "key": "field_reel_1_instagram_url",
+        "label": "Reel 1 - Instagram Link",
+        "name": "reel_1_instagram_url",
+        "type": "text",
+        "instructions": "Link to post on Instagram",
+        "required": 0,
+        "default_value": "https://www.instagram.com/"
+      },
+      {
+        "key": "field_reel_1_product_link",
+        "label": "Reel 1 - Product Page Link",
+        "name": "reel_1_product_link",
+        "type": "text",
+        "instructions": "Link to product (e.g. /product/23)",
+        "required": 0,
+        "default_value": "/product/23"
+      },
+
+      {
+        "key": "field_reel_2_title",
+        "label": "Reel 2 - Title",
+        "name": "reel_2_title",
+        "type": "text",
+        "required": 0,
+        "default_value": "Stacked Black Shoe Shine Wipes"
+      },
+      {
+        "key": "field_reel_2_category",
+        "label": "Reel 2 - Category",
+        "name": "reel_2_category",
+        "type": "text",
+        "required": 0,
+        "default_value": "Shoe Care"
+      },
+      {
+        "key": "field_reel_2_price",
+        "label": "Reel 2 - Price (₹)",
+        "name": "reel_2_price",
+        "type": "number",
+        "required": 0,
+        "default_value": 180
+      },
+      {
+        "key": "field_reel_2_original_price",
+        "label": "Reel 2 - Original Price (₹)",
+        "name": "reel_2_original_price",
+        "type": "number",
+        "required": 0,
+        "default_value": 249
+      },
+      {
+        "key": "field_reel_2_discount",
+        "label": "Reel 2 - Discount Badge Text",
+        "name": "reel_2_discount",
+        "type": "text",
+        "required": 0,
+        "default_value": "28% Off"
+      },
+      {
+        "key": "field_reel_2_video_url",
+        "label": "Reel 2 - Video MP4 URL",
+        "name": "reel_2_video_url",
+        "type": "text",
+        "required": 0,
+        "default_value": "/videos/reel2.mp4"
+      },
+      {
+        "key": "field_reel_2_poster",
+        "label": "Reel 2 - Poster / Thumbnail Image",
+        "name": "reel_2_poster",
+        "type": "image",
+        "required": 0,
+        "return_format": "url",
+        "preview_size": "medium",
+        "library": "all"
+      },
+      {
+        "key": "field_reel_2_instagram_url",
+        "label": "Reel 2 - Instagram Link",
+        "name": "reel_2_instagram_url",
+        "type": "text",
+        "required": 0,
+        "default_value": "https://www.instagram.com/"
+      },
+      {
+        "key": "field_reel_2_product_link",
+        "label": "Reel 2 - Product Page Link",
+        "name": "reel_2_product_link",
+        "type": "text",
+        "required": 0,
+        "default_value": "/product/14"
+      },
+
+      {
+        "key": "field_reel_3_title",
+        "label": "Reel 3 - Title",
+        "name": "reel_3_title",
+        "type": "text",
+        "required": 0,
+        "default_value": "7 in 1 Laundry Pod (20 Pods Cleaning Power)"
+      },
+      {
+        "key": "field_reel_3_category",
+        "label": "Reel 3 - Category",
+        "name": "reel_3_category",
+        "type": "text",
+        "required": 0,
+        "default_value": "Home Essentials, Laundry"
+      },
+      {
+        "key": "field_reel_3_price",
+        "label": "Reel 3 - Price (₹)",
+        "name": "reel_3_price",
+        "type": "number",
+        "required": 0,
+        "default_value": 200
+      },
+      {
+        "key": "field_reel_3_original_price",
+        "label": "Reel 3 - Original Price (₹)",
+        "name": "reel_3_original_price",
+        "type": "number",
+        "required": 0,
+        "default_value": 399
+      },
+      {
+        "key": "field_reel_3_discount",
+        "label": "Reel 3 - Discount Badge Text",
+        "name": "reel_3_discount",
+        "type": "text",
+        "required": 0,
+        "default_value": "50% Off"
+      },
+      {
+        "key": "field_reel_3_video_url",
+        "label": "Reel 3 - Video MP4 URL",
+        "name": "reel_3_video_url",
+        "type": "text",
+        "required": 0,
+        "default_value": "/videos/reel3.mp4"
+      },
+      {
+        "key": "field_reel_3_poster",
+        "label": "Reel 3 - Poster / Thumbnail Image",
+        "name": "reel_3_poster",
+        "type": "image",
+        "required": 0,
+        "return_format": "url",
+        "preview_size": "medium",
+        "library": "all"
+      },
+      {
+        "key": "field_reel_3_instagram_url",
+        "label": "Reel 3 - Instagram Link",
+        "name": "reel_3_instagram_url",
+        "type": "text",
+        "required": 0,
+        "default_value": "https://www.instagram.com/"
+      },
+      {
+        "key": "field_reel_3_product_link",
+        "label": "Reel 3 - Product Page Link",
+        "name": "reel_3_product_link",
+        "type": "text",
+        "required": 0,
+        "default_value": "/product/12"
+      },
+
+      {
+        "key": "field_reel_4_title",
+        "label": "Reel 4 - Title",
+        "name": "reel_4_title",
+        "type": "text",
+        "required": 0,
+        "default_value": "Drone E88 Dual-Camera Store Showcase"
+      },
+      {
+        "key": "field_reel_4_category",
+        "label": "Reel 4 - Category",
+        "name": "reel_4_category",
+        "type": "text",
+        "required": 0,
+        "default_value": "Electronics"
+      },
+      {
+        "key": "field_reel_4_price",
+        "label": "Reel 4 - Price (₹)",
+        "name": "reel_4_price",
+        "type": "number",
+        "required": 0,
+        "default_value": 1399
+      },
+      {
+        "key": "field_reel_4_original_price",
+        "label": "Reel 4 - Original Price (₹)",
+        "name": "reel_4_original_price",
+        "type": "number",
+        "required": 0,
+        "default_value": 1500
+      },
+      {
+        "key": "field_reel_4_discount",
+        "label": "Reel 4 - Discount Badge Text",
+        "name": "reel_4_discount",
+        "type": "text",
+        "required": 0,
+        "default_value": "7% Off"
+      },
+      {
+        "key": "field_reel_4_video_url",
+        "label": "Reel 4 - Video MP4 URL",
+        "name": "reel_4_video_url",
+        "type": "text",
+        "required": 0,
+        "default_value": "/videos/reel4.mp4"
+      },
+      {
+        "key": "field_reel_4_poster",
+        "label": "Reel 4 - Poster / Thumbnail Image",
+        "name": "reel_4_poster",
+        "type": "image",
+        "required": 0,
+        "return_format": "url",
+        "preview_size": "medium",
+        "library": "all"
+      },
+      {
+        "key": "field_reel_4_instagram_url",
+        "label": "Reel 4 - Instagram Link",
+        "name": "reel_4_instagram_url",
+        "type": "text",
+        "required": 0,
+        "default_value": "https://www.instagram.com/"
+      },
+      {
+        "key": "field_reel_4_product_link",
+        "label": "Reel 4 - Product Page Link",
+        "name": "reel_4_product_link",
+        "type": "text",
+        "required": 0,
+        "default_value": "/product/21"
+      },
+
+      {
+        "key": "field_tab_footer",
+        "label": "🦶 Footer & Socials",
+        "name": "",
+        "type": "tab",
+        "instructions": "",
+        "placement": "top",
+        "endpoint": 0
+      },
+      {
+        "key": "field_footer_logo",
+        "label": "Footer Logo Image",
+        "name": "footer_logo",
+        "type": "image",
+        "instructions": "Footer logo (leave empty to use main website logo)",
+        "required": 0,
+        "return_format": "url",
+        "preview_size": "medium",
+        "library": "all"
+      },
+      {
+        "key": "field_footer_facebook_url",
+        "label": "Facebook Page URL",
+        "name": "footer_facebook_url",
+        "type": "text",
+        "required": 0,
+        "default_value": "https://facebook.com"
+      },
+      {
+        "key": "field_footer_whatsapp_url",
+        "label": "WhatsApp Link / Direct Chat URL",
+        "name": "footer_whatsapp_url",
+        "type": "text",
+        "required": 0,
+        "default_value": "https://wa.me/919072525292"
+      },
+      {
+        "key": "field_footer_instagram_url",
+        "label": "Instagram Profile URL",
+        "name": "footer_instagram_url",
+        "type": "text",
+        "required": 0,
+        "default_value": "https://instagram.com"
+      },
+      {
+        "key": "field_footer_copyright",
+        "label": "Footer Copyright Text",
+        "name": "footer_copyright",
+        "type": "text",
+        "required": 0,
+        "default_value": "Copyright 2026 © AZB Store. v1.1.5 | All rights Reserved"
+      },
+
+      {
+        "key": "field_tab_contact",
+        "label": "📞 Contact Page",
+        "name": "",
+        "type": "tab",
+        "instructions": "",
+        "placement": "top",
+        "endpoint": 0
+      },
+      {
+        "key": "field_contact_title",
+        "label": "Contact Page Heading",
+        "name": "contact_title",
+        "type": "text",
+        "required": 0,
+        "default_value": "Get In Touch"
+      },
+      {
+        "key": "field_contact_subtitle",
+        "label": "Contact Page Subtitle / Intro",
+        "name": "contact_subtitle",
+        "type": "textarea",
+        "rows": 3,
+        "required": 0,
+        "default_value": "Have a question about our products, your order, or just want to say hi? We're always here to help. Drop us a message below!"
+      },
+      {
+        "key": "field_contact_address_text",
+        "label": "Physical Headquarters Address",
+        "name": "contact_address_text",
+        "type": "textarea",
+        "rows": 3,
+        "required": 0,
+        "default_value": "AZB Store\nKarunagappally\nKollam"
+      },
+      {
+        "key": "field_contact_hours_text",
+        "label": "Business Hours Notice",
+        "name": "contact_hours_text",
+        "type": "text",
+        "required": 0,
+        "default_value": "Mon-Fri: 9:00 AM - 6:00 PM"
+      },
+
+      {
+        "key": "field_tab_policies",
+        "label": "📜 Policy Pages",
+        "name": "",
+        "type": "tab",
+        "instructions": "",
+        "placement": "top",
+        "endpoint": 0
+      },
+      {
+        "key": "field_policy_return_title",
+        "label": "Return Policy - Page Title",
+        "name": "policy_return_title",
+        "type": "text",
+        "required": 0,
+        "default_value": "Return, Cancellation & Refund policy"
+      },
+      {
+        "key": "field_policy_return_content",
+        "label": "Return Policy - Content (HTML / Rich Text)",
+        "name": "policy_return_content",
+        "type": "wysiwyg",
+        "instructions": "Full policy content displayed at /policy/return",
+        "required": 0,
+        "tabs": "all",
+        "toolbar": "full",
+        "media_upload": 1,
+        "default_value": "<h2>Defective or Damaged Items</h2><p>Defective or damaged items will be replaced upon verification. <strong>An unedited continuous unboxing video is mandatory for all damage claims</strong> and must be submitted within 24 hours of delivery.</p><h2>Non-Returnable Policy</h2><p>Due to hygiene, electronic and packaging considerations, items once delivered and opened are non-returnable unless defective.</p>"
+      },
+      {
+        "key": "field_policy_privacy_title",
+        "label": "Privacy Policy - Page Title",
+        "name": "policy_privacy_title",
+        "type": "text",
+        "required": 0,
+        "default_value": "Privacy Policy"
+      },
+      {
+        "key": "field_policy_privacy_content",
+        "label": "Privacy Policy - Content (HTML / Rich Text)",
+        "name": "policy_privacy_content",
+        "type": "wysiwyg",
+        "instructions": "Full policy content displayed at /policy/privacy",
+        "required": 0,
+        "tabs": "all",
+        "toolbar": "full",
+        "media_upload": 1,
+        "default_value": "<p>At AZB Store, we respect your privacy and are committed to protecting any personal information you share with us. We collect necessary customer details such as delivery address, contact numbers, and payment verification solely to process your orders securely.</p><p>We never sell, rent, or trade your personal information to third parties.</p>"
+      },
+      {
+        "key": "field_policy_terms_title",
+        "label": "Terms of Service - Page Title",
+        "name": "policy_terms_title",
+        "type": "text",
+        "required": 0,
+        "default_value": "Terms of Service"
+      },
+      {
+        "key": "field_policy_terms_content",
+        "label": "Terms of Service - Content (HTML / Rich Text)",
+        "name": "policy_terms_content",
+        "type": "wysiwyg",
+        "instructions": "Full policy content displayed at /policy/terms",
+        "required": 0,
+        "tabs": "all",
+        "toolbar": "full",
+        "media_upload": 1,
+        "default_value": "<p>By browsing or placing an order through AZB Store, you agree to comply with our store policies, dispatch schedules, and terms of use. Product availability and pricing are subject to real-time inventory updates.</p>"
+      },
+      {
+        "key": "field_policy_shipping_title",
+        "label": "Shipping Policy - Page Title",
+        "name": "policy_shipping_title",
+        "type": "text",
+        "required": 0,
+        "default_value": "Shipping Policy"
+      },
+      {
+        "key": "field_policy_shipping_content",
+        "label": "Shipping Policy - Content (HTML / Rich Text)",
+        "name": "policy_shipping_content",
+        "type": "wysiwyg",
+        "instructions": "Full policy content displayed at /policy/shipping",
+        "required": 0,
+        "tabs": "all",
+        "toolbar": "full",
+        "media_upload": 1,
+        "default_value": "<p><strong>Free Shipping:</strong> We provide Free All-India Shipping on eligible purchases across all pincodes.</p><p><strong>Dispatch Days:</strong> All orders are securely dispatched on our designated shipping days: <strong>Wednesday and Saturday</strong>. Once shipped, consignment tracking links are sent directly via SMS/WhatsApp.</p>"
+      }
+    ],
+    "location": [
+      [
+        {
+          "param": "post_type",
+          "operator": "==",
+          "value": "page"
+        }
+      ],
+      [
+        {
+          "param": "options_page",
+          "operator": "==",
+          "value": "site-settings"
+        }
+      ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Complete site content management for AZB Store website (Text, Banners, Announcements, Reels, Contact, Policies)",
+    "show_in_rest": 1
+  }
+]

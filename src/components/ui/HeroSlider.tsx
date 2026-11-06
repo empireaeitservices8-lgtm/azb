@@ -1,8 +1,9 @@
 'use client';
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { useSiteSettings } from '@/contexts/SiteSettingsContext';
 
-const slides = [
+const DEFAULT_SLIDES = [
   {
     image: "/images/banner1.jpg",
     title: "Happy Family Clothing & Toys",
@@ -21,16 +22,22 @@ const slides = [
 ];
 
 export default function HeroSlider() {
+  const { settings } = useSiteSettings();
+  const slides = settings.hero_slides && settings.hero_slides.length > 0 
+    ? settings.hero_slides 
+    : DEFAULT_SLIDES;
+
   const [current, setCurrent] = useState(0);
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
 
   useEffect(() => {
+    if (slides.length <= 1) return;
     const timer = setInterval(() => {
       setCurrent((prev) => (prev + 1) % slides.length);
     }, 7000);
     return () => clearInterval(timer);
-  }, []);
+  }, [slides.length]);
 
   const nextSlide = () => {
     setCurrent((prev) => (prev + 1) % slides.length);
@@ -74,10 +81,10 @@ export default function HeroSlider() {
             current === index ? 'opacity-100 z-10 pointer-events-auto' : 'opacity-0 z-0 pointer-events-none'
           }`}
         >
-          <Link href={slide.link} className="block w-full h-full relative cursor-pointer">
+          <Link href={slide.link || '/shop'} className="block w-full h-full relative cursor-pointer">
             <img 
               src={slide.image} 
-              alt={slide.title}
+              alt={slide.title || 'AZB Store Banner'}
               className="w-full h-full object-cover object-center"
               loading={index === 0 ? "eager" : "lazy"}
             />
@@ -86,18 +93,20 @@ export default function HeroSlider() {
       ))}
 
       {/* Pagination Dots */}
-      <div className="absolute bottom-2 sm:bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 sm:gap-2.5 z-20">
-        {slides.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => setCurrent(index)}
-            className={`h-1.5 sm:h-2 rounded-full transition-all duration-300 shadow-sm cursor-pointer ${
-              current === index ? 'w-5 sm:w-6 bg-yellow-400' : 'w-1.5 sm:w-2 bg-white/70 hover:bg-white'
-            }`}
-            aria-label={`Go to slide ${index + 1}`}
-          />
-        ))}
-      </div>
+      {slides.length > 1 && (
+        <div className="absolute bottom-2 sm:bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 sm:gap-2.5 z-20">
+          {slides.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrent(index)}
+              className={`h-1.5 sm:h-2 rounded-full transition-all duration-300 shadow-sm cursor-pointer ${
+                current === index ? 'w-5 sm:w-6 bg-yellow-400' : 'w-1.5 sm:w-2 bg-white/70 hover:bg-white'
+              }`}
+              aria-label={`Go to slide ${index + 1}`}
+            />
+          ))}
+        </div>
+      )}
     </section>
   );
 }

@@ -1,22 +1,11 @@
 'use client';
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ChevronLeft, ChevronRight, Volume2, VolumeX, ExternalLink } from 'lucide-react';
+import { useSiteSettings } from '@/contexts/SiteSettingsContext';
+import { InstagramReel } from '@/lib/siteSettings';
 
-interface ReelItem {
-  id: number;
-  title: string;
-  category: string;
-  price: number;
-  originalPrice: number;
-  discount: string;
-  videoSrc: string;
-  instagramUrl: string;
-  poster?: string;
-  productId?: number;
-}
-
-const reelVideos: ReelItem[] = [
+const DEFAULT_REELS = [
   {
     id: 101,
     productId: 23,
@@ -68,13 +57,34 @@ const reelVideos: ReelItem[] = [
 ];
 
 export default function InstagramReels() {
+  const { settings } = useSiteSettings();
+  const [liveReels, setLiveReels] = useState<InstagramReel[]>([]);
+
+  useEffect(() => {
+    async function loadReels() {
+      try {
+        const res = await fetch('/api/reels');
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.reels && data.reels.length > 0) {
+            setLiveReels(data.reels);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load reels from /api/reels:', err);
+      }
+    }
+    loadReels();
+  }, []);
+
+  const reelVideos = liveReels.length > 0
+    ? liveReels
+    : (settings.reels && settings.reels.length > 0 ? settings.reels : DEFAULT_REELS);
+  const sectionTitle = settings.reels_title || 'INSTAGRAM REELS';
+  const sectionSubtitle = settings.reels_subtitle || 'Watch our latest videos & tap to view on Instagram';
+
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [mutedStates, setMutedStates] = useState<{ [key: number]: boolean }>({
-    101: true,
-    102: true,
-    103: true,
-    104: true
-  });
+  const [mutedStates, setMutedStates] = useState<{ [key: number]: boolean }>({});
   const videoRefs = useRef<{ [key: number]: HTMLVideoElement | null }>({});
 
   const toggleMute = (e: React.MouseEvent, id: number) => {
@@ -115,9 +125,9 @@ export default function InstagramReels() {
           </div>
           <div>
             <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 uppercase tracking-wide">
-              INSTAGRAM REELS
+              {sectionTitle}
             </h2>
-            <p className="text-[11px] sm:text-xs text-gray-500">Watch our latest videos & tap to view on Instagram</p>
+            <p className="text-[11px] sm:text-xs text-gray-500">{sectionSubtitle}</p>
           </div>
         </div>
 
@@ -139,7 +149,7 @@ export default function InstagramReels() {
         </div>
       </div>
 
-      {/* 4 Video Reel Carousel */}
+      {/* Video Reel Carousel */}
       <div 
         ref={scrollContainerRef}
         className="flex gap-4 sm:gap-5 md:gap-6 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-3 sm:pb-4"
@@ -152,7 +162,7 @@ export default function InstagramReels() {
           >
             {/* Reel Video Container (Clicking opens Instagram in a new tab) */}
             <a
-              href={reel.instagramUrl}
+              href={reel.instagramUrl || 'https://www.instagram.com/'}
               target="_blank"
               rel="noopener noreferrer"
               className="relative aspect-[9/16] bg-black rounded-t-xl overflow-hidden cursor-pointer block"
@@ -169,7 +179,7 @@ export default function InstagramReels() {
                 preload="metadata"
               >
                 <source src={reel.videoSrc} type="video/mp4" />
-                <source src={reel.videoSrc.replace('.mp4.mp4', '.mp4')} type="video/mp4" />
+                <source src={reel.videoSrc?.replace('.mp4.mp4', '.mp4')} type="video/mp4" />
               </video>
 
               {/* Sound / Mute Toggle Button */}
@@ -201,13 +211,17 @@ export default function InstagramReels() {
               </Link>
               
               {/* Category */}
-              <p className="text-[11px] sm:text-xs text-gray-500 mt-0.5">{reel.category}</p>
+              {reel.category && <p className="text-[11px] sm:text-xs text-gray-500 mt-0.5">{reel.category}</p>}
               
               {/* Rate (Price, Original Price, Discount) */}
               <div className="mt-2 flex items-baseline gap-1.5 sm:gap-2 flex-wrap">
                 <span className="text-base sm:text-lg font-extrabold text-gray-900">₹{reel.price}</span>
-                <span className="text-xs text-gray-400 line-through">₹{reel.originalPrice}</span>
-                <span className="text-xs font-bold text-red-500">({reel.discount})</span>
+                {reel.originalPrice > reel.price && (
+                  <span className="text-xs text-gray-400 line-through">₹{reel.originalPrice}</span>
+                )}
+                {reel.discount && (
+                  <span className="text-xs font-bold text-red-500">({reel.discount})</span>
+                )}
               </div>
 
               {/* Buy Now CTA */}
