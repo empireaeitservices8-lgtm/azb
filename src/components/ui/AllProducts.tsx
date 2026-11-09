@@ -80,6 +80,25 @@ export default function AllProducts() {
   const totalSlides = mobileGroups.length;
   const displayGroups = totalSlides > 1 ? [...mobileGroups, mobileGroups[0]] : mobileGroups;
 
+  // Desktop layout: 2 rows with 5 products per row in desktop/system view
+  let desktopRow1: ProductItem[] = [];
+  let desktopRow2: ProductItem[] = [];
+  if (items.length >= 10) {
+    const half = Math.ceil(items.length / 2);
+    desktopRow1 = items.slice(0, half);
+    desktopRow2 = items.slice(half);
+  } else if (items.length > 0) {
+    desktopRow1 = items.slice(0, 5);
+    while (desktopRow1.length < 5) {
+      desktopRow1.push(...items.slice(0, 5 - desktopRow1.length));
+    }
+    const remaining = items.slice(5);
+    desktopRow2 = [...remaining];
+    while (desktopRow2.length < 5) {
+      desktopRow2.push(...items.slice(0, 5 - desktopRow2.length));
+    }
+  }
+
   const nextSlide = () => {
     if (totalSlides <= 1) return;
     setIsTransitioning(true);
@@ -151,6 +170,103 @@ export default function AllProducts() {
     }
   };
 
+  const renderDesktopCard = (product: ProductItem, key: string) => (
+    <div 
+      key={key}
+      className="w-[calc((100%-48px)/4)] lg:w-[calc((100%-80px)/5)] shrink-0 flex flex-col group"
+    >
+      {/* Image Box */}
+      <div className="relative aspect-square w-full bg-gray-50 rounded-2xl overflow-hidden shadow-2xs">
+        <Link href={`/product/${product.id}`} className="block w-full h-full">
+          <img 
+            src={product.image} 
+            alt={product.title} 
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            loading="lazy"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.src = 'https://images.unsplash.com/photo-1587654780291-39c9404d746b?auto=format&fit=crop&w=600&q=80';
+            }}
+          />
+        </Link>
+
+        {/* Stock Status Badge */}
+        {product.soldOut ? (
+          <span className="absolute top-2.5 left-2.5 bg-red-600 text-white text-[10px] sm:text-xs font-black uppercase tracking-wider px-2 py-0.5 rounded-md shadow-xs z-10">
+            Out of Stock
+          </span>
+        ) : (
+          <span className="absolute top-2.5 left-2.5 bg-emerald-600 text-white text-[10px] sm:text-xs font-black uppercase tracking-wider px-2 py-0.5 rounded-md shadow-xs z-10">
+            In Stock
+          </span>
+        )}
+
+        {/* Wishlist Button */}
+        <button 
+          onClick={() => isInWishlist(Number(product.id)) ? removeFromWishlist(Number(product.id)) : addToWishlist(product as unknown as Product)}
+          className={`absolute top-2.5 right-2.5 w-9 h-9 rounded-xl flex items-center justify-center backdrop-blur-xs shadow-xs transition-all z-10 cursor-pointer ${
+            isInWishlist(Number(product.id))
+              ? 'bg-red-50 text-red-500 ring-1 ring-red-300'
+              : 'bg-white/95 text-gray-400 hover:text-red-500 hover:bg-white'
+          }`}
+          aria-label="Wishlist"
+          title={isInWishlist(Number(product.id)) ? "Remove from wishlist" : "Add to wishlist"}
+        >
+          <Heart size={16} fill={isInWishlist(Number(product.id)) ? "currentColor" : "none"} />
+        </button>
+      </div>
+
+      {/* Details */}
+      <div className="flex flex-col mt-3">
+        <Link href={`/product/${product.id}`} className="hover:text-yellow-600 transition-colors">
+          <h3 className="font-bold text-sm text-gray-900 line-clamp-1 leading-snug">
+            {product.title}
+          </h3>
+        </Link>
+        <p className="text-xs text-gray-400 font-medium mt-0.5">{product.category}</p>
+        
+        <div className="mt-1 flex items-baseline gap-1.5 flex-wrap">
+          <span className="text-base lg:text-lg font-bold text-gray-900">₹{product.price}</span>
+          {product.originalPrice && product.originalPrice > product.price && (
+            <span className="text-xs text-gray-400 line-through font-normal">₹{product.originalPrice}</span>
+          )}
+          {product.discount && (
+            <span className="text-xs font-bold text-red-500">({product.discount})</span>
+          )}
+        </div>
+
+        {/* Action Buttons: Add to Cart & Buy Now */}
+        <div className="mt-2.5 flex items-center gap-1.5 flex-wrap">
+          {product.soldOut ? (
+            <button 
+              disabled
+              className="bg-[#1e2d3d] text-white text-xs font-semibold px-3 py-1.5 rounded-lg opacity-85 cursor-not-allowed"
+            >
+              Sold Out
+            </button>
+          ) : (
+            <>
+              <button 
+                onClick={() => addToCart(product as unknown as Product)}
+                className="bg-[#1e2d3d] hover:bg-[#15202b] text-white text-xs font-semibold px-2.5 sm:px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
+                title="Add to Cart"
+              >
+                Add to Cart
+              </button>
+              <button 
+                onClick={() => handleBuyNow(product)}
+                className="bg-yellow-400 hover:bg-yellow-500 text-black text-xs font-bold px-2.5 sm:px-3 py-1.5 rounded-lg transition-colors cursor-pointer shadow-2xs"
+                title="Buy Now"
+              >
+                Buy Now
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+
   if (items.length === 0) return null;
 
   return (
@@ -192,108 +308,21 @@ export default function AllProducts() {
         </div>
       </div>
 
-      {/* 1. Laptop / Desktop View (Row of Products Matching Best Selling Products) */}
+      {/* 1. Laptop / Desktop View (2 Rows of 5 Products) */}
       <div className="hidden md:block">
         <div 
           ref={desktopScrollRef}
-          className="flex items-start gap-4 lg:gap-5 overflow-x-auto scroll-smooth scrollbar-hide py-1"
+          className="flex flex-col gap-6 overflow-x-auto scroll-smooth scrollbar-hide py-1"
         >
-          {items.map((product, idx) => (
-            <div 
-              key={`desktop-all-${product.id}-${idx}`}
-              className="w-[calc((100%-48px)/4)] lg:w-[calc((100%-80px)/5)] shrink-0 flex flex-col group"
-            >
-              {/* Image Box */}
-              <div className="relative aspect-square w-full bg-gray-50 rounded-2xl overflow-hidden shadow-2xs">
-                <Link href={`/product/${product.id}`} className="block w-full h-full">
-                  <img 
-                    src={product.image} 
-                    alt={product.title} 
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    loading="lazy"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.src = 'https://images.unsplash.com/photo-1587654780291-39c9404d746b?auto=format&fit=crop&w=600&q=80';
-                    }}
-                  />
-                </Link>
+          {/* Row 1 (5 products) */}
+          <div className="flex items-start gap-4 lg:gap-5 min-w-full">
+            {desktopRow1.map((product, idx) => renderDesktopCard(product, `desktop-r1-${product.id}-${idx}`))}
+          </div>
 
-                {/* Stock Status Badge */}
-                {product.soldOut ? (
-                  <span className="absolute top-2.5 left-2.5 bg-red-600 text-white text-[10px] sm:text-xs font-black uppercase tracking-wider px-2 py-0.5 rounded-md shadow-xs z-10">
-                    Out of Stock
-                  </span>
-                ) : (
-                  <span className="absolute top-2.5 left-2.5 bg-emerald-600 text-white text-[10px] sm:text-xs font-black uppercase tracking-wider px-2 py-0.5 rounded-md shadow-xs z-10">
-                    In Stock
-                  </span>
-                )}
-
-                {/* Wishlist Button */}
-                <button 
-                  onClick={() => isInWishlist(Number(product.id)) ? removeFromWishlist(Number(product.id)) : addToWishlist(product as unknown as Product)}
-                  className={`absolute top-2.5 right-2.5 w-9 h-9 rounded-xl flex items-center justify-center backdrop-blur-xs shadow-xs transition-all z-10 cursor-pointer ${
-                    isInWishlist(Number(product.id))
-                      ? 'bg-red-50 text-red-500 ring-1 ring-red-300'
-                      : 'bg-white/95 text-gray-400 hover:text-red-500 hover:bg-white'
-                  }`}
-                  aria-label="Wishlist"
-                  title={isInWishlist(Number(product.id)) ? "Remove from wishlist" : "Add to wishlist"}
-                >
-                  <Heart size={16} fill={isInWishlist(Number(product.id)) ? "currentColor" : "none"} />
-                </button>
-              </div>
-
-              {/* Details */}
-              <div className="flex flex-col mt-3">
-                <Link href={`/product/${product.id}`} className="hover:text-yellow-600 transition-colors">
-                  <h3 className="font-bold text-sm text-gray-900 line-clamp-1 leading-snug">
-                    {product.title}
-                  </h3>
-                </Link>
-                <p className="text-xs text-gray-400 font-medium mt-0.5">{product.category}</p>
-                
-                <div className="mt-1 flex items-baseline gap-1.5 flex-wrap">
-                  <span className="text-base lg:text-lg font-bold text-gray-900">₹{product.price}</span>
-                  {product.originalPrice && product.originalPrice > product.price && (
-                    <span className="text-xs text-gray-400 line-through font-normal">₹{product.originalPrice}</span>
-                  )}
-                  {product.discount && (
-                    <span className="text-xs font-bold text-red-500">({product.discount})</span>
-                  )}
-                </div>
-
-                {/* Action Buttons: Add to Cart & Buy Now */}
-                <div className="mt-2.5 flex items-center gap-1.5 flex-wrap">
-                  {product.soldOut ? (
-                    <button 
-                      disabled
-                      className="bg-[#1e2d3d] text-white text-xs font-semibold px-3 py-1.5 rounded-lg opacity-85 cursor-not-allowed"
-                    >
-                      Sold Out
-                    </button>
-                  ) : (
-                    <>
-                      <button 
-                        onClick={() => addToCart(product as unknown as Product)}
-                        className="bg-[#1e2d3d] hover:bg-[#15202b] text-white text-xs font-semibold px-2.5 sm:px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
-                        title="Add to Cart"
-                      >
-                        Add to Cart
-                      </button>
-                      <button 
-                        onClick={() => handleBuyNow(product)}
-                        className="bg-yellow-400 hover:bg-yellow-500 text-black text-xs font-bold px-2.5 sm:px-3 py-1.5 rounded-lg transition-colors cursor-pointer shadow-2xs"
-                        title="Buy Now"
-                      >
-                        Buy Now
-                      </button>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
-          ))}
+          {/* Row 2 (5 products directly underneath) */}
+          <div className="flex items-start gap-4 lg:gap-5 min-w-full">
+            {desktopRow2.map((product, idx) => renderDesktopCard(product, `desktop-r2-${product.id}-${idx}`))}
+          </div>
         </div>
       </div>
 
