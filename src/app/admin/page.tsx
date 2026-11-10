@@ -3,17 +3,18 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { 
-  Video, Plus, Trash2, Edit2, ExternalLink, Lock, Eye, CheckCircle2, 
+  Video, Plus, Trash2, Edit2, ExternalLink, Lock, Eye, EyeOff, CheckCircle2, 
   AlertCircle, RefreshCw, ShoppingBag, ArrowLeft, X, Play, Package, Check, Search
 } from 'lucide-react';
 import { InstagramReel } from '@/lib/siteSettings';
 import { Product } from '@/data/products';
 
-const ADMIN_PIN = process.env.NEXT_PUBLIC_ADMIN_PIN || '1234';
+const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || process.env.NEXT_PUBLIC_ADMIN_PIN || 'AzbStore@Secure2026#';
 
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [pinInput, setPinInput] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [pinError, setPinError] = useState('');
 
   const [activeTab, setActiveTab] = useState<'reels' | 'inventory'>('reels');
@@ -86,12 +87,12 @@ export default function AdminPage() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (pinInput === ADMIN_PIN || pinInput === 'azb2026') {
+    if (pinInput === ADMIN_PASSWORD) {
       sessionStorage.setItem('azb_admin_logged_in', 'true');
       setIsAuthenticated(true);
       setPinError('');
     } else {
-      setPinError('Incorrect PIN. Please enter the correct admin PIN.');
+      setPinError('Incorrect password. Please enter the correct admin password.');
     }
   };
 
@@ -259,7 +260,7 @@ export default function AdminPage() {
     }
   };
 
-  // 1. PIN Login Screen
+  // 1. Password Login Screen
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center px-4">
@@ -268,21 +269,31 @@ export default function AdminPage() {
             <Lock className="text-gray-900" size={28} />
           </div>
           <h1 className="text-2xl font-black text-center text-gray-900 mb-1">AZB Store Admin</h1>
-          <p className="text-sm text-center text-gray-500 mb-6">Enter Admin PIN to manage Reels & Products</p>
+          <p className="text-sm text-center text-gray-500 mb-6">Enter Admin Password to manage Reels & Products</p>
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1">
-                Admin PIN
+                Admin Password
               </label>
-              <input
-                type="password"
-                value={pinInput}
-                onChange={(e) => setPinInput(e.target.value)}
-                placeholder="Enter PIN (Default: 1234)"
-                autoFocus
-                className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 outline-none text-center text-lg tracking-widest font-mono"
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={pinInput}
+                  onChange={(e) => setPinInput(e.target.value)}
+                  placeholder="Enter Admin Password"
+                  autoFocus
+                  className="w-full px-4 py-3 pr-11 rounded-xl border border-gray-300 focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 outline-none text-sm"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1"
+                  title={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
             </div>
 
             {pinError && (
