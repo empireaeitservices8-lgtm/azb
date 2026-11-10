@@ -92,12 +92,18 @@ async function saveReelsToWC(reels: InstagramReel[]): Promise<boolean> {
   }
 }
 
+const NO_CACHE_HEADERS = {
+  'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+  'Pragma': 'no-cache',
+  'Expires': '0'
+};
+
 export async function GET() {
   const reels = await getSavedReelsFromWC();
   return NextResponse.json({
     success: true,
     reels
-  });
+  }, { headers: NO_CACHE_HEADERS });
 }
 
 export async function POST(req: Request) {
@@ -140,12 +146,12 @@ export async function POST(req: Request) {
       message: 'Reel added successfully and is now live on the website!',
       reel: newReel,
       reels: updated
-    });
+    }, { headers: NO_CACHE_HEADERS });
   } catch (err) {
     console.error('Error adding reel:', err);
     return NextResponse.json(
       { success: false, message: 'Failed to add reel' },
-      { status: 500 }
+      { status: 500, headers: NO_CACHE_HEADERS }
     );
   }
 }
@@ -158,7 +164,7 @@ export async function PUT(req: Request) {
     if (!id) {
       return NextResponse.json(
         { success: false, message: 'Reel ID is required for update.' },
-        { status: 400 }
+        { status: 400, headers: NO_CACHE_HEADERS }
       );
     }
 
@@ -188,12 +194,12 @@ export async function PUT(req: Request) {
       success: true,
       message: 'Reel updated successfully!',
       reels: updated
-    });
+    }, { headers: NO_CACHE_HEADERS });
   } catch (err) {
     console.error('Error updating reel:', err);
     return NextResponse.json(
       { success: false, message: 'Failed to update reel' },
-      { status: 500 }
+      { status: 500, headers: NO_CACHE_HEADERS }
     );
   }
 }
@@ -216,7 +222,7 @@ export async function DELETE(req: Request) {
     if (!id) {
       return NextResponse.json(
         { success: false, message: 'Reel ID is required to delete.' },
-        { status: 400 }
+        { status: 400, headers: NO_CACHE_HEADERS }
       );
     }
 
@@ -229,12 +235,12 @@ export async function DELETE(req: Request) {
       success: true,
       message: 'Reel removed successfully!',
       reels: updated
-    });
+    }, { headers: NO_CACHE_HEADERS });
   } catch (err) {
     console.error('Error deleting reel:', err);
     return NextResponse.json(
       { success: false, message: 'Failed to delete reel' },
-      { status: 500 }
+      { status: 500, headers: NO_CACHE_HEADERS }
     );
   }
 }

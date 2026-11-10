@@ -4,7 +4,8 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { 
   Video, Plus, Trash2, Edit2, ExternalLink, Lock, Eye, EyeOff, CheckCircle2, 
-  AlertCircle, RefreshCw, ShoppingBag, ArrowLeft, X, Play, Package, Check, Search
+  AlertCircle, RefreshCw, ShoppingBag, ArrowLeft, X, Play, Package, Check, Search,
+  Upload, Link as LinkIcon, Image as ImageIcon
 } from 'lucide-react';
 import { InstagramReel } from '@/lib/siteSettings';
 import { Product } from '@/data/products';
@@ -30,6 +31,11 @@ export default function AdminPage() {
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingReel, setEditingReel] = useState<InstagramReel | null>(null);
+
+  // Media Input Modes (File upload vs URL)
+  const [videoInputMode, setVideoInputMode] = useState<'upload' | 'url'>('upload');
+  const [imageInputMode, setImageInputMode] = useState<'upload' | 'url'>('upload');
+  const [videoFileError, setVideoFileError] = useState('');
 
   // Form Fields
   const [formData, setFormData] = useState({
@@ -105,6 +111,9 @@ export default function AdminPage() {
   // Open modal for Adding new reel
   const handleOpenAddModal = () => {
     setEditingReel(null);
+    setVideoInputMode('upload');
+    setImageInputMode('upload');
+    setVideoFileError('');
     setFormData({
       title: '',
       description: '',
@@ -123,6 +132,9 @@ export default function AdminPage() {
   // Open modal for Editing reel
   const handleOpenEditModal = (reel: InstagramReel) => {
     setEditingReel(reel);
+    setVideoInputMode(reel.videoSrc?.startsWith('data:') ? 'upload' : 'url');
+    setImageInputMode(reel.poster?.startsWith('data:') ? 'upload' : 'url');
+    setVideoFileError('');
     setFormData({
       title: reel.title || '',
       description: reel.description || '',
@@ -136,6 +148,73 @@ export default function AdminPage() {
       instagramUrl: reel.instagramUrl || 'https://www.instagram.com/'
     });
     setIsModalOpen(true);
+  };
+
+  // Image Upload Handler with client-side canvas compression
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_SIZE = 800;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_SIZE) {
+            height = Math.round((height * MAX_SIZE) / width);
+            width = MAX_SIZE;
+          }
+        } else {
+          if (height > MAX_SIZE) {
+            width = Math.round((width * MAX_SIZE) / height);
+            height = MAX_SIZE;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, width, height);
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.82);
+          setFormData(prev => ({ ...prev, poster: compressedDataUrl }));
+        }
+      };
+      if (typeof event.target?.result === 'string') {
+        img.src = event.target.result;
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // Video Upload Handler
+  const handleVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // 4.5MB threshold to respect serverless function payload limits
+    const MAX_VIDEO_BYTES = 4.5 * 1024 * 1024;
+    if (file.size > MAX_VIDEO_BYTES) {
+      const mbSize = (file.size / (1024 * 1024)).toFixed(1);
+      setVideoFileError(
+        `File is ${mbSize} MB. Direct upload supports up to 4.5MB for fast mobile loading. For larger videos, upload to WordPress Media (wp-admin) and paste the link in the "Enter URL" tab.`
+      );
+      return;
+    }
+
+    setVideoFileError('');
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      if (typeof event.target?.result === 'string') {
+        setFormData(prev => ({ ...prev, videoSrc: event.target?.result as string }));
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
   // Handle product dropdown selection to auto-fill details
@@ -165,7 +244,15 @@ export default function AdminPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.title.trim() || !formData.videoSrc.trim()) {
-      setStatusMessage({ type: 'error', text: 'Title and Video URL are required.' });
+      setStatusMessage({ type: 'error', text: 'Reel Title and Video (File or URL) are required.' });
+      return;
+    }
+
+    if (formData.videoSrc.includes('instagram.com/reel') || formData.videoSrc.includes('instagram.com/p/')) {
+      setStatusMessage({ 
+        type: 'error', 
+        text: 'Instagram post links cannot be used as direct video source. Please upload an .mp4 video file or enter an MP4 URL, and paste the Instagram link in the "Instagram Post Link" field.' 
+      });
       return;
     }
 
@@ -830,42 +917,198 @@ export default function AdminPage() {
                 />
               </div>
 
-              {/* Video URL */}
-              <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
-                  4. Video MP4 URL *
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="https://.../video.mp4 or /videos/reel1.mp4"
-                  value={formData.videoSrc}
-                  onChange={(e) => setFormData({ ...formData, videoSrc: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-gray-300 text-xs sm:text-sm focus:ring-2 focus:ring-yellow-400 outline-none"
-                />
-                <span className="text-[11px] text-gray-400 mt-0.5 block">
-                  Link to your MP4 file (from WordPress Media Library, Cloudinary, or local /videos/).
-                </span>
+              {/* 4. Video (Upload File OR Enter URL) */}
+              <div className="bg-gray-50/80 p-3.5 rounded-xl border border-gray-200">
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-xs font-bold text-gray-800 uppercase tracking-wider flex items-center gap-1.5">
+                    <Video size={14} className="text-yellow-600" />
+                    <span>4. Reel Video *</span>
+                  </label>
+
+                  {/* Mode switcher tabs */}
+                  <div className="flex items-center bg-gray-200/80 p-0.5 rounded-lg text-xs font-semibold">
+                    <button
+                      type="button"
+                      onClick={() => setVideoInputMode('upload')}
+                      className={`px-2.5 py-1 rounded-md transition-all flex items-center gap-1 cursor-pointer ${
+                        videoInputMode === 'upload' 
+                          ? 'bg-white text-gray-900 shadow-xs' 
+                          : 'text-gray-500 hover:text-gray-800'
+                      }`}
+                    >
+                      <Upload size={12} />
+                      <span>Upload File</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setVideoInputMode('url')}
+                      className={`px-2.5 py-1 rounded-md transition-all flex items-center gap-1 cursor-pointer ${
+                        videoInputMode === 'url' 
+                          ? 'bg-white text-gray-900 shadow-xs' 
+                          : 'text-gray-500 hover:text-gray-800'
+                      }`}
+                    >
+                      <LinkIcon size={12} />
+                      <span>Enter URL</span>
+                    </button>
+                  </div>
+                </div>
+
+                {videoInputMode === 'upload' ? (
+                  <div>
+                    <label className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 hover:border-yellow-400 bg-white rounded-xl p-4 cursor-pointer transition-colors group">
+                      <Upload size={24} className="text-gray-400 group-hover:text-yellow-500 mb-1 transition-colors" />
+                      <span className="text-xs font-bold text-gray-700">Click or tap to choose video file</span>
+                      <span className="text-[11px] text-gray-400 mt-0.5">MP4, WebM, MOV (Direct file upload)</span>
+                      <input
+                        type="file"
+                        accept="video/mp4,video/webm,video/quicktime,video/*"
+                        onChange={handleVideoUpload}
+                        className="hidden"
+                      />
+                    </label>
+
+                    {videoFileError && (
+                      <p className="text-xs text-red-600 mt-1.5 font-medium flex items-center gap-1">
+                        <AlertCircle size={13} className="shrink-0" />
+                        <span>{videoFileError}</span>
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <div>
+                    <input
+                      type="text"
+                      placeholder="https://.../video.mp4 or /videos/reel1.mp4"
+                      value={formData.videoSrc}
+                      onChange={(e) => {
+                        setVideoFileError('');
+                        setFormData({ ...formData, videoSrc: e.target.value });
+                      }}
+                      className="w-full px-3 py-2 rounded-xl border border-gray-300 bg-white text-xs sm:text-sm focus:ring-2 focus:ring-yellow-400 outline-none"
+                    />
+                    <span className="text-[11px] text-gray-400 mt-1 block">
+                      Direct link to an .mp4 file (from WordPress Media Library or web host).
+                    </span>
+                  </div>
+                )}
+
+                {/* Live Video Preview if present */}
+                {formData.videoSrc && (
+                  <div className="mt-2.5 p-2 bg-black rounded-xl overflow-hidden flex flex-col items-center">
+                    <span className="text-[10px] text-gray-300 font-bold mb-1 uppercase tracking-wider">Video Preview:</span>
+                    <video
+                      key={formData.videoSrc}
+                      src={formData.videoSrc}
+                      controls
+                      playsInline
+                      className="max-h-48 rounded-lg w-auto object-contain"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, videoSrc: '' }))}
+                      className="text-[11px] text-red-400 hover:text-red-300 mt-1.5 flex items-center gap-1 cursor-pointer"
+                    >
+                      <X size={12} />
+                      <span>Remove Video</span>
+                    </button>
+                  </div>
+                )}
               </div>
 
-              {/* Poster Thumbnail */}
-              <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
-                  4. Thumbnail / Poster Image URL
-                </label>
-                <input
-                  type="text"
-                  placeholder="https://.../thumbnail.jpg"
-                  value={formData.poster}
-                  onChange={(e) => setFormData({ ...formData, poster: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border border-gray-300 text-xs sm:text-sm focus:ring-2 focus:ring-yellow-400 outline-none"
-                />
+              {/* 5. Thumbnail / Poster Image (Upload File OR Enter URL) */}
+              <div className="bg-gray-50/80 p-3.5 rounded-xl border border-gray-200">
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-xs font-bold text-gray-800 uppercase tracking-wider flex items-center gap-1.5">
+                    <ImageIcon size={14} className="text-yellow-600" />
+                    <span>5. Thumbnail / Poster Image</span>
+                  </label>
+
+                  {/* Mode switcher tabs */}
+                  <div className="flex items-center bg-gray-200/80 p-0.5 rounded-lg text-xs font-semibold">
+                    <button
+                      type="button"
+                      onClick={() => setImageInputMode('upload')}
+                      className={`px-2.5 py-1 rounded-md transition-all flex items-center gap-1 cursor-pointer ${
+                        imageInputMode === 'upload' 
+                          ? 'bg-white text-gray-900 shadow-xs' 
+                          : 'text-gray-500 hover:text-gray-800'
+                      }`}
+                    >
+                      <Upload size={12} />
+                      <span>Upload File</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setImageInputMode('url')}
+                      className={`px-2.5 py-1 rounded-md transition-all flex items-center gap-1 cursor-pointer ${
+                        imageInputMode === 'url' 
+                          ? 'bg-white text-gray-900 shadow-xs' 
+                          : 'text-gray-500 hover:text-gray-800'
+                      }`}
+                    >
+                      <LinkIcon size={12} />
+                      <span>Enter URL</span>
+                    </button>
+                  </div>
+                </div>
+
+                {imageInputMode === 'upload' ? (
+                  <div>
+                    <label className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 hover:border-yellow-400 bg-white rounded-xl p-3 cursor-pointer transition-colors group">
+                      <Upload size={22} className="text-gray-400 group-hover:text-yellow-500 mb-1 transition-colors" />
+                      <span className="text-xs font-bold text-gray-700">Click or tap to choose image</span>
+                      <span className="text-[11px] text-gray-400 mt-0.5">JPG, PNG, WebP (Automatically optimized)</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+                ) : (
+                  <div>
+                    <input
+                      type="text"
+                      placeholder="https://.../thumbnail.jpg"
+                      value={formData.poster}
+                      onChange={(e) => setFormData({ ...formData, poster: e.target.value })}
+                      className="w-full px-3 py-2 rounded-xl border border-gray-300 bg-white text-xs sm:text-sm focus:ring-2 focus:ring-yellow-400 outline-none"
+                    />
+                    <span className="text-[11px] text-gray-400 mt-1 block">
+                      Direct image link to show as cover before the video plays.
+                    </span>
+                  </div>
+                )}
+
+                {/* Live Image Preview if present */}
+                {formData.poster && (
+                  <div className="mt-2.5 p-2 bg-white rounded-xl border border-gray-200 flex items-center gap-3">
+                    <img 
+                      src={formData.poster} 
+                      alt="Thumbnail Preview" 
+                      className="w-16 h-16 object-cover rounded-lg border border-gray-100 shadow-2xs"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <span className="text-xs font-bold text-gray-800 block truncate">Thumbnail Selected</span>
+                      <button
+                        type="button"
+                        onClick={() => setFormData(prev => ({ ...prev, poster: '' }))}
+                        className="text-[11px] text-red-500 hover:text-red-700 mt-0.5 flex items-center gap-1 cursor-pointer"
+                      >
+                        <X size={12} />
+                        <span>Remove Thumbnail</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
-              {/* Instagram URL */}
+              {/* 6. Instagram URL */}
               <div>
                 <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
-                  5. Instagram Post Link
+                  6. Instagram Post Link
                 </label>
                 <input
                   type="url"

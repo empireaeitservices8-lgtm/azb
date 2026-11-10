@@ -65,7 +65,7 @@ export default function InstagramReels() {
   useEffect(() => {
     async function loadReels() {
       try {
-        const res = await fetch('/api/reels');
+        const res = await fetch('/api/reels', { cache: 'no-store' });
         if (res.ok) {
           const data = await res.json();
           if (data?.reels && data.reels.length > 0) {
@@ -171,6 +171,8 @@ export default function InstagramReels() {
               aria-label={`View ${reel.title} on Instagram`}
             >
               <video
+                key={reel.videoSrc}
+                src={reel.videoSrc}
                 ref={(el) => { videoRefs.current[reel.id] = el; }}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 poster={reel.poster}
